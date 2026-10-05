@@ -1,4 +1,5 @@
 """Modal runner for the Qwen2.5-3B four-rule replication."""
+from copy import deepcopy
 import os
 import sys
 from pathlib import Path
@@ -10,6 +11,13 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/scam")
 CONFIG_PATH = "configs/stegano_experiments_3b.yaml"
 RULES = ["s1", "voice", "clause", "lexical"]
+VARIANTS = {
+    "lexical_e6": {
+        "rule": "lexical",
+        "training": {"epochs": 6},
+        "adapter": "checkpoints/qwen3b-cot-sft-lexical-e6",
+    }
+}
 GPU = "A100-80GB"
 TIMEOUT = 2 * 60 * 60
 
@@ -141,10 +149,18 @@ def _prepare():
     pio.renderers.default = "json"
 
 
-def _config():
+def _config(variant: str = ""):
     from experiments.data import config
 
-    return config(CONFIG_PATH)
+    cfg = deepcopy(config(CONFIG_PATH))
+    if variant:
+        if variant not in VARIANTS:
+            raise ValueError(f"Unknown variant: {variant}")
+        spec = VARIANTS[variant]
+        cfg["training"].update(spec["training"])
+        cfg["rules"][spec["rule"]]["adapter"] = spec["adapter"]
+        cfg["variant"] = variant
+    return cfg
 
 
 @app.function(
@@ -157,27 +173,29 @@ def _config():
         "/root/.cache/huggingface": hf_cache_volume,
     },
 )
-def train_rule(rule: str):
+def train_rule(rule: str, variant: str = ""):
     _prepare()
-    cfg = _config()
+    cfg = _config(variant)
+    if variant and rule != VARIANTS[variant]["rule"]:
+        raise ValueError(f"Variant {variant} must use rule {VARIANTS[variant]['rule']}")
     adapter = Path(cfg["rules"][rule]["adapter"])
     if (adapter / "adapter_model.safetensors").exists():
-        print(f"Training already complete for {rule}; skipping.")
+        print(f"Training already complete for {variant or rule}; skipping.")
     else:
         from experiments.colab import train
 
         train(cfg, rule)
         scam_volume.commit()
 
-    baseline_dir = Path("/vol/outputs/baselines") / rule
+    baseline_dir = Path("/vol/outputs/baselines") / (variant or rule)
     if (baseline_dir / "experiment.json").exists():
-        print(f"Baseline already complete for {rule}; skipping.")
+        print(f"Baseline already complete for {variant or rule}; skipping.")
     else:
         from experiments.colab import baselines
 
         baselines(cfg, rule, baseline_dir)
         scam_volume.commit()
-    return rule
+    return variant or rule
 
 
 @app.function(
@@ -190,12 +208,20 @@ def train_rule(rule: str):
         "/root/.cache/huggingface": hf_cache_volume,
     },
 )
-def scan_rule(rule: str, layers: list[int], out_dir: str, run_free: bool):
+def scan_rule(
+    rule: str,
+    layers: list[int],
+    out_dir: str,
+    run_free: bool,
+    variant: str = "",
+):
     _prepare()
-    cfg = _config()
+    cfg = _config(variant)
+    if variant and rule != VARIANTS[variant]["rule"]:
+        raise ValueError(f"Variant {variant} must use rule {VARIANTS[variant]['rule']}")
     adapter = Path(cfg["rules"][rule]["adapter"]) / "adapter_model.safetensors"
     if not adapter.is_file():
-        raise FileNotFoundError(f"Train {rule} before scanning; adapter missing: {adapter}")
+        raise FileNotFoundError(f"Train {variant or rule} before scanning; adapter missing: {adapter}")
     out = Path(out_dir)
     required_scan_outputs = (
         out / "experiment.json",
@@ -206,7 +232,7 @@ def scan_rule(rule: str, layers: list[int], out_dir: str, run_free: bool):
     if (out / "experiment.json").exists():
         if not all(path.exists() for path in required_scan_outputs):
             raise RuntimeError(f"Scan output is incomplete and cannot be safely resumed: {out}")
-        print(f"Scan already complete for {rule}; skipping.")
+        print(f"Scan already complete for {variant or rule}; skipping.")
         import torch
 
         selected = torch.load(
@@ -232,7 +258,10 @@ def scan_rule(rule: str, layers: list[int], out_dir: str, run_free: bool):
             out / "free",
         )
         scam_volume.commit()
-    return {"rule": rule, "layer": selected["layer"]}
+    result = {"rule": rule, "layer": selected["layer"]}
+    if variant:
+        result["variant"] = variant
+    return result
 
 
 @app.function(
@@ -336,41 +365,51 @@ def smoke():
 
 
 @app.local_entrypoint()
-def main(stage: str, rules: str = "s1,voice,clause,lexical"):
-    selected_rules = [rule.strip() for rule in rules.split(",") if rule.strip()]
-    unknown = set(selected_rules) - set(RULES)
-    if unknown:
-        raise ValueError(f"Unknown rules: {sorted(unknown)}")
+def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = ""):
+    if variant:
+        if variant not in VARIANTS:
+            raise ValueError(f"Unknown variant: {variant}")
+        selected_rules = [VARIANTS[variant]["rule"]]
+    else:
+        selected_rules = [rule.strip() for rule in rules.split(",") if rule.strip()]
+        unknown = set(selected_rules) - set(RULES)
+        if unknown:
+            raise ValueError(f"Unknown rules: {sorted(unknown)}")
 
     if stage == "smoke":
         smoke.remote()
     elif stage == "train":
-        for rule in train_rule.map(selected_rules):
+        variants = [variant] * len(selected_rules)
+        for rule in train_rule.map(selected_rules, variants):
             print(f"Training/baseline finished: {rule}")
     elif stage == "scan_full":
         layers = list(range(36))
+        output_names = [variant or rule for rule in selected_rules]
         out_dirs = [
-            f"/vol/outputs/scans/3b_full/{rule}_residual_scan_3b_full"
-            for rule in selected_rules
+            f"/vol/outputs/scans/3b_full/{name}_residual_scan_3b_full"
+            for name in output_names
         ]
         for result in scan_rule.map(
             selected_rules,
             [layers] * len(selected_rules),
             out_dirs,
             [True] * len(selected_rules),
+            [variant] * len(selected_rules),
         ):
             print(f"Full scan finished: {result}")
     elif stage == "scan_late":
         layers = [30, 31, 32, 33]
+        output_names = [variant or rule for rule in selected_rules]
         out_dirs = [
-            f"/vol/outputs/scans/3b_late_l30plus/{rule}_residual_scan_l30plus"
-            for rule in selected_rules
+            f"/vol/outputs/scans/3b_late_l30plus/{name}_residual_scan_l30plus"
+            for name in output_names
         ]
         for result in scan_rule.map(
             selected_rules,
             [layers] * len(selected_rules),
             out_dirs,
             [False] * len(selected_rules),
+            [variant] * len(selected_rules),
         ):
             print(f"Late scan finished: {result}")
     elif stage == "transfer":

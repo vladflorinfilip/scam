@@ -2,28 +2,59 @@
 import argparse
 import hashlib
 import json
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path, PurePosixPath
 
 
 ROOT = Path(__file__).resolve().parents[1]
 VOLUME = "scam-3b"
 RULES = ("s1", "voice", "clause", "lexical")
+PULL_RULES = (*RULES, "lexical_e6")
+STAGES = ("adapter", "baseline", "scan_full", "scan_late", "transfer")
 LIMIT = 95 * 1024 * 1024
 SKIP_TRAINING_FILES = {"optimizer.pt", "scheduler.pt", "rng_state.pth"}
+LOCAL_CRITIC_FILES = {
+    "free_critic_summary.json",
+    "critic_metadata.json",
+    "clause_critic_sentence_cache.json",
+}
 
 
 def run_modal(*args, capture=False):
     command = ["modal", *map(str, args)]
     if capture:
-        return subprocess.check_output(command, text=True)
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode:
+            raise subprocess.CalledProcessError(
+                result.returncode,
+                command,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+        return result.stdout
     subprocess.run(command, check=True)
     return None
 
 
 def volume_entries(path):
-    output = run_modal("volume", "ls", "--json", VOLUME, path, capture=True)
+    try:
+        output = run_modal("volume", "ls", "--json", VOLUME, path, capture=True)
+    except subprocess.CalledProcessError as error:
+        if "No such file or directory" in (error.stderr or ""):
+            return []
+        raise
     return json.loads(output)
+
+
+def volume_file_exists(path):
+    marker = PurePosixPath(path)
+    return any(
+        entry["type"] == "file"
+        and PurePosixPath(entry["filename"]).name == marker.name
+        for entry in volume_entries(marker.parent.as_posix())
+    )
 
 
 def files_under(path):
@@ -60,14 +91,26 @@ def pull_file(remote, destination):
 
 def pull_directory(remote, destination):
     destination = Path(destination)
-    destination.mkdir(parents=True, exist_ok=True)
-    run_modal(
-        "volume",
-        "get",
-        "--force",
-        VOLUME,
-        remote,
-        destination,
+    with tempfile.TemporaryDirectory(prefix="pull-3b-") as temporary:
+        staging = Path(temporary)
+        run_modal("volume", "get", "--force", VOLUME, remote, staging)
+        source = staging / PurePosixPath(remote).name
+        if not source.is_dir():
+            raise RuntimeError(f"Modal did not download the expected directory: {remote}")
+        destination.mkdir(parents=True, exist_ok=True)
+        for path in source.rglob("*"):
+            relative = path.relative_to(source)
+            target = destination / relative
+            if path.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+            elif not is_local_critic_output(relative):
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, target)
+
+
+def is_local_critic_output(path):
+    return path.name in LOCAL_CRITIC_FILES or (
+        path.name.startswith("free_") and path.name.endswith("_critic.jsonl")
     )
 
 
@@ -266,12 +309,7 @@ def convert_activations(path):
     path.unlink()
 
 
-def sanitize_downloads():
-    roots = (
-        ROOT / "data/experiments/residuals/scans/3b_full",
-        ROOT / "data/experiments/residuals/scans/3b_late_l30plus",
-        ROOT / "data/experiments/residuals/transfer/four_rule_3b_l30",
-    )
+def sanitize_downloads(roots):
     for root in roots:
         if root.exists():
             for path in root.rglob("activations.pt"):
@@ -289,29 +327,99 @@ def main():
     parser = argparse.ArgumentParser()
     global VOLUME
     parser.add_argument("--volume", default=VOLUME)
+    parser.add_argument(
+        "--rules",
+        default=",".join(RULES),
+        help="Comma-separated rules/variants for per-rule stages (default: standard rules)",
+    )
+    parser.add_argument(
+        "--stages",
+        default=",".join(STAGES),
+        help="Comma-separated stages to pull (default: all stages)",
+    )
     args = parser.parse_args()
     VOLUME = args.volume
 
-    for rule in RULES:
-        remote = f"checkpoints/qwen3b-cot-sft-{rule}"
-        for file in files_under(remote):
-            pull_file(file, ROOT / file)
-        baseline = f"outputs/baselines/{rule}"
-        pull_directory(baseline, ROOT / f"data/experiments/baselines/3b/{rule}")
+    def parse_filter(value, choices, name):
+        parts = (part.strip() for part in value.split(","))
+        selected = tuple(dict.fromkeys(part for part in parts if part))
+        invalid = sorted(set(selected) - set(choices))
+        if not selected or invalid:
+            raise ValueError(
+                f"--{name} must be a comma-separated list of {', '.join(choices)}"
+                + (f"; unknown: {', '.join(invalid)}" if invalid else "")
+            )
+        return selected
 
-    pull_directory(
-        "outputs/scans/3b_full",
-        ROOT / "data/experiments/residuals/scans/3b_full",
-    )
-    pull_directory(
-        "outputs/scans/3b_late_l30plus",
-        ROOT / "data/experiments/residuals/scans/3b_late_l30plus",
-    )
-    pull_directory(
-        "outputs/transfer/four_rule_3b_l30",
-        ROOT / "data/experiments/residuals/transfer/four_rule_3b_l30",
-    )
-    sanitize_downloads()
+    try:
+        selected_rules = parse_filter(args.rules, PULL_RULES, "rules")
+        selected_stages = set(parse_filter(args.stages, STAGES, "stages"))
+    except ValueError as error:
+        parser.error(str(error))
+
+    print(f"Rules: {','.join(selected_rules)}")
+    print(f"Stages: {','.join(stage for stage in STAGES if stage in selected_stages)}")
+    sanitize_roots = []
+
+    for rule in selected_rules:
+        if "adapter" in selected_stages:
+            remote = f"checkpoints/qwen3b-cot-sft-{rule.replace('_', '-')}"
+            marker = f"{remote}/adapter_model.safetensors"
+            if volume_file_exists(marker):
+                files = files_under(remote)
+                for file in files:
+                    pull_file(file, ROOT / file)
+                print(f"PULLED stage=adapter rule={rule} files={len(files)}", flush=True)
+            else:
+                print(f"SKIPPED stage=adapter rule={rule}: missing marker {marker}", flush=True)
+
+        if "baseline" in selected_stages:
+            remote = f"outputs/baselines/{rule}"
+            marker = f"{remote}/experiment.json"
+            if volume_file_exists(marker):
+                pull_directory(remote, ROOT / "data/experiments/baselines/3b" / rule)
+                print(f"PULLED stage=baseline rule={rule}", flush=True)
+            else:
+                print(f"SKIPPED stage=baseline rule={rule}: missing marker {marker}", flush=True)
+
+        if "scan_full" in selected_stages:
+            scan_name = f"{rule}_residual_scan_3b_full"
+            remote = f"outputs/scans/3b_full/{scan_name}"
+            marker = f"{remote}/free/free_summary.json"
+            if volume_file_exists(marker):
+                destination = ROOT / "data/experiments/residuals/scans/3b_full" / scan_name
+                pull_directory(remote, destination)
+                sanitize_roots.append(destination)
+                print(f"PULLED stage=scan_full rule={rule}", flush=True)
+            else:
+                print(f"SKIPPED stage=scan_full rule={rule}: missing marker {marker}", flush=True)
+
+        if "scan_late" in selected_stages:
+            scan_name = f"{rule}_residual_scan_l30plus"
+            remote = f"outputs/scans/3b_late_l30plus/{scan_name}"
+            marker = f"{remote}/summary.json"
+            if volume_file_exists(marker):
+                destination = (
+                    ROOT / "data/experiments/residuals/scans/3b_late_l30plus" / scan_name
+                )
+                pull_directory(remote, destination)
+                sanitize_roots.append(destination)
+                print(f"PULLED stage=scan_late rule={rule}", flush=True)
+            else:
+                print(f"SKIPPED stage=scan_late rule={rule}: missing marker {marker}", flush=True)
+
+    if "transfer" in selected_stages:
+        remote = "outputs/transfer/four_rule_3b_l30"
+        marker = f"{remote}/summary.json"
+        if volume_file_exists(marker):
+            destination = ROOT / "data/experiments/residuals/transfer/four_rule_3b_l30"
+            pull_directory(remote, destination)
+            sanitize_roots.append(destination)
+            print("PULLED stage=transfer", flush=True)
+        else:
+            print(f"SKIPPED stage=transfer: missing marker {marker}", flush=True)
+
+    sanitize_downloads(sanitize_roots)
 
 
 if __name__ == "__main__":
