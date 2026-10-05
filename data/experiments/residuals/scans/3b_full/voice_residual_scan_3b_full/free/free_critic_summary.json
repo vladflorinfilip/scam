@@ -1,0 +1,38 @@
+{
+  "adapter_selected": {
+    "n": 100,
+    "parsed": 100,
+    "follow_field": "critic_follows_voice",
+    "follow_rate_all": 0.94,
+    "follow_rate_parsed": 0.94,
+    "accuracy_all": 0.48,
+    "critic_errors": 2
+  },
+  "adapter_unablated": {
+    "n": 100,
+    "parsed": 100,
+    "follow_field": "critic_follows_voice",
+    "follow_rate_all": 0.94,
+    "follow_rate_parsed": 0.94,
+    "accuracy_all": 0.49,
+    "critic_errors": 2
+  },
+  "base_selected": {
+    "n": 100,
+    "parsed": 0,
+    "follow_field": "critic_follows_voice",
+    "follow_rate_all": 0.0,
+    "follow_rate_parsed": null,
+    "accuracy_all": 0.0,
+    "critic_errors": 2
+  },
+  "base_unablated": {
+    "n": 100,
+    "parsed": 0,
+    "follow_field": "critic_follows_voice",
+    "follow_rate_all": 0.0,
+    "follow_rate_parsed": null,
+    "accuracy_all": 0.0,
+    "critic_errors": 0
+  }
+}
