@@ -1,0 +1,158 @@
+{
+  "selected_rank": 8,
+  "passed": false,
+  "scores": {
+    "1": {
+      "s1": {
+        "follow": 0.9833333492279053,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.0,
+        "gap": 11.279167175292969,
+        "gap_recovery": 0.283704883069687,
+        "base_preservation": 0.949999988079071,
+        "base_agreement": 0.6000000238418579,
+        "predicts_1": 0.4833333194255829,
+        "both_correct": 0.9666666388511658
+      },
+      "voice": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.0,
+        "gap": 10.034375190734863,
+        "gap_recovery": 0.13623186085620098,
+        "base_preservation": 0.8500000238418579,
+        "base_agreement": 0.550000011920929,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 16.758853912353516,
+        "gap_recovery": -0.008905250000273979,
+        "base_preservation": 0.949999988079071,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    },
+    "2": {
+      "s1": {
+        "follow": 0.9666666388511658,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.016666710376739502,
+        "gap": 9.108854293823242,
+        "gap_recovery": 0.5537982694705335,
+        "base_preservation": 0.8833333253860474,
+        "base_agreement": 0.6166666746139526,
+        "predicts_1": 0.5,
+        "both_correct": 0.9333333373069763
+      },
+      "voice": {
+        "follow": 0.9833333492279053,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.016666650772094727,
+        "gap": 9.637499809265137,
+        "gap_recovery": 0.17244002110433,
+        "base_preservation": 0.75,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.4833333194255829,
+        "both_correct": 0.9666666388511658
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 14.702083587646484,
+        "gap_recovery": 0.11714005078064926,
+        "base_preservation": 0.8999999761581421,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    },
+    "4": {
+      "s1": {
+        "follow": 0.9833333492279053,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.0,
+        "gap": 3.840625286102295,
+        "gap_recovery": 0.7905756108213576,
+        "base_preservation": 0.9166666865348816,
+        "base_agreement": 0.6000000238418579,
+        "predicts_1": 0.5166666507720947,
+        "both_correct": 0.9666666388511658
+      },
+      "voice": {
+        "follow": 0.7666666507720947,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.23333334922790527,
+        "gap": 5.756771087646484,
+        "gap_recovery": 0.5264908239319761,
+        "base_preservation": 0.7666666507720947,
+        "base_agreement": 0.38333332538604736,
+        "predicts_1": 0.2666666805744171,
+        "both_correct": 0.5333333611488342
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 12.231770515441895,
+        "gap_recovery": 0.26852854101152923,
+        "base_preservation": 0.9333333373069763,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    },
+    "8": {
+      "s1": {
+        "follow": 0.5333333611488342,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.44999998807907104,
+        "gap": 0.015625,
+        "gap_recovery": 0.31455794116722025,
+        "base_preservation": 0.9166666865348816,
+        "base_agreement": 0.3499999940395355,
+        "predicts_1": 0.1666666716337204,
+        "both_correct": 0.20000000298023224
+      },
+      "voice": {
+        "follow": 0.6666666865348816,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.3333333134651184,
+        "gap": 4.7520833015441895,
+        "gap_recovery": 0.6181515770475098,
+        "base_preservation": 0.7666666507720947,
+        "base_agreement": 0.38333332538604736,
+        "predicts_1": 0.1666666716337204,
+        "both_correct": 0.3333333432674408
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 7.4864583015441895,
+        "gap_recovery": 0.5593360746068627,
+        "base_preservation": 0.9166666865348816,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "lexical": {
+    "selected": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 12.777944564819336,
+      "gap_recovery": 0.13070275460890923,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_0": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.716196060180664,
+      "gap_recovery": -6.0800687144313414e-05,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_1": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.709735870361328,
+      "gap_recovery": 0.00037503407975025826,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_2": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.701021194458008,
+      "gap_recovery": 0.0009629670735326057,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_3": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.714242935180664,
+      "gap_recovery": 7.096630467740006e-05,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_4": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.737980842590332,
+      "gap_recovery": -0.0015305044928972666,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    }
+  }
+}

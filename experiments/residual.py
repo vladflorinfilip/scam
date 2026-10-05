@@ -294,7 +294,9 @@ def plot_geometry(geo, out):
     for name,(x,y,z) in zip(names,xyz.tolist()):
         fig.add_trace(go.Scatter3d(x=[0,x],y=[0,y],z=[0,z],mode='lines+markers+text',text=['',name],name=name))
     fig.update_layout(title='Rule mean directions; assess full-space cosines alongside projection',scene_aspectmode='cube')
-    fig.write_html(str(Path(out)/'directions_3d.html'),include_plotlyjs=True); fig.show()
+    fig.write_html(str(Path(out)/'directions_3d.html'),include_plotlyjs=True)
+    try: fig.show()
+    except ValueError: pass  # headless runs (e.g. Modal) have no IPython renderer
 
 
 def free_generation(cfg, intervention, out):

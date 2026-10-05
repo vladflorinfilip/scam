@@ -1,0 +1,50 @@
+{
+  "30": {
+    "follow": 1.0,
+    "unablated_follow": 1.0,
+    "base_follow": 0.5,
+    "follow_drop": 0.0,
+    "gap": 14.036978721618652,
+    "gap_recovery": 0.04695226189544799,
+    "base_preservation": 1.0,
+    "base_agreement": 0.5,
+    "predicts_1": 0.5,
+    "both_correct": 1.0
+  },
+  "31": {
+    "follow": 1.0,
+    "unablated_follow": 1.0,
+    "base_follow": 0.5,
+    "follow_drop": 0.0,
+    "gap": 13.929426193237305,
+    "gap_recovery": 0.05423675607251777,
+    "base_preservation": 1.0,
+    "base_agreement": 0.5,
+    "predicts_1": 0.5,
+    "both_correct": 1.0
+  },
+  "32": {
+    "follow": 1.0,
+    "unablated_follow": 1.0,
+    "base_follow": 0.5,
+    "follow_drop": 0.0,
+    "gap": 12.999739646911621,
+    "gap_recovery": 0.11720409245346408,
+    "base_preservation": 1.0,
+    "base_agreement": 0.5,
+    "predicts_1": 0.5,
+    "both_correct": 1.0
+  },
+  "33": {
+    "follow": 1.0,
+    "unablated_follow": 1.0,
+    "base_follow": 0.5,
+    "follow_drop": 0.0,
+    "gap": 12.923957824707031,
+    "gap_recovery": 0.1223367680947074,
+    "base_preservation": 1.0,
+    "base_agreement": 0.5,
+    "predicts_1": 0.5,
+    "both_correct": 1.0
+  }
+}
