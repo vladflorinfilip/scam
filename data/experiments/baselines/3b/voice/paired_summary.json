@@ -1,0 +1,12 @@
+{
+  "follow": 0.9950000047683716,
+  "unablated_follow": 0.9950000047683716,
+  "base_follow": 0.49000000953674316,
+  "follow_drop": 0.0,
+  "gap": 11.322656631469727,
+  "gap_recovery": 0.0,
+  "base_preservation": 1.0,
+  "base_agreement": 0.48500001430511475,
+  "predicts_1": 0.4950000047683716,
+  "both_correct": 0.9900000095367432
+}

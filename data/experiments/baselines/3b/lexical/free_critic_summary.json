@@ -1,0 +1,18 @@
+{
+  "adapter_unablated": {
+    "n": 100,
+    "parsed": 100,
+    "follow_field": "rule_follow",
+    "follow_rate_all": 0.45,
+    "follow_rate_parsed": 0.45,
+    "accuracy_all": 0.46
+  },
+  "base_unablated": {
+    "n": 100,
+    "parsed": 0,
+    "follow_field": "rule_follow",
+    "follow_rate_all": 0.0,
+    "follow_rate_parsed": null,
+    "accuracy_all": 0.0
+  }
+}
