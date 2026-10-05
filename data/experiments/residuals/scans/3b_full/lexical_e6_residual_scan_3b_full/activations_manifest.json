@@ -1,0 +1,150 @@
+{
+  "source_file": "activations.pt",
+  "original_sha256": "f6c74b1b84fca1da4085b7ddef2f41ad6e4e2f525c5dea17663f34f082632fc2",
+  "original_shapes": {
+    "activations.lexical.base.fit.margin": [
+      100
+    ],
+    "activations.lexical.base.fit.greedy_label": [
+      100
+    ],
+    "activations.lexical.base.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.lexical.base.select.margin": [
+      60
+    ],
+    "activations.lexical.base.select.greedy_label": [
+      60
+    ],
+    "activations.lexical.base.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.lexical.base.eval.margin": [
+      104
+    ],
+    "activations.lexical.base.eval.greedy_label": [
+      104
+    ],
+    "activations.lexical.base.eval.h": [
+      104,
+      36,
+      2048
+    ],
+    "activations.lexical.adapter.fit.margin": [
+      100
+    ],
+    "activations.lexical.adapter.fit.greedy_label": [
+      100
+    ],
+    "activations.lexical.adapter.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.lexical.adapter.select.margin": [
+      60
+    ],
+    "activations.lexical.adapter.select.greedy_label": [
+      60
+    ],
+    "activations.lexical.adapter.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.lexical.adapter.eval.margin": [
+      104
+    ],
+    "activations.lexical.adapter.eval.greedy_label": [
+      104
+    ],
+    "activations.lexical.adapter.eval.h": [
+      104,
+      36,
+      2048
+    ]
+  },
+  "outputs": [
+    {
+      "file": "activations_adapter_fp16.pt",
+      "shapes": {
+        "activations.lexical.adapter.fit.margin": [
+          100
+        ],
+        "activations.lexical.adapter.fit.greedy_label": [
+          100
+        ],
+        "activations.lexical.adapter.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.lexical.adapter.select.margin": [
+          60
+        ],
+        "activations.lexical.adapter.select.greedy_label": [
+          60
+        ],
+        "activations.lexical.adapter.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.lexical.adapter.eval.margin": [
+          104
+        ],
+        "activations.lexical.adapter.eval.greedy_label": [
+          104
+        ],
+        "activations.lexical.adapter.eval.h": [
+          104,
+          36,
+          2048
+        ]
+      }
+    },
+    {
+      "file": "activations_base_fp16.pt",
+      "shapes": {
+        "activations.lexical.base.fit.margin": [
+          100
+        ],
+        "activations.lexical.base.fit.greedy_label": [
+          100
+        ],
+        "activations.lexical.base.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.lexical.base.select.margin": [
+          60
+        ],
+        "activations.lexical.base.select.greedy_label": [
+          60
+        ],
+        "activations.lexical.base.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.lexical.base.eval.margin": [
+          104
+        ],
+        "activations.lexical.base.eval.greedy_label": [
+          104
+        ],
+        "activations.lexical.base.eval.h": [
+          104,
+          36,
+          2048
+        ]
+      }
+    }
+  ]
+}

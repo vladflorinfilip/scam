@@ -1,0 +1,76 @@
+{
+  "lexical": {
+    "selected": {
+      "follow": 0.9903846383094788,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.00961536169052124,
+      "gap": 10.668418884277344,
+      "gap_recovery": 0.2730212713938397,
+      "base_preservation": 1.0,
+      "base_agreement": 0.49038460850715637,
+      "predicts_1": 0.49038460850715637,
+      "both_correct": 0.9807692170143127
+    },
+    "random_0": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.749248504638672,
+      "gap_recovery": -0.0022906739305794677,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_1": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.690654754638672,
+      "gap_recovery": 0.0016623358240704933,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_2": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.685846328735352,
+      "gap_recovery": 0.001986734834209525,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_3": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.723708152770996,
+      "gap_recovery": -0.0005676017587161741,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_4": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5,
+      "follow_drop": 0.0,
+      "gap": 14.670222282409668,
+      "gap_recovery": 0.0030408064294313863,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    }
+  }
+}
