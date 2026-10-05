@@ -1,0 +1,150 @@
+{
+  "source_file": "activations.pt",
+  "original_sha256": "50d1c94c0dd956f20bd2879c64c78736396b5054dacee9f82b7c0d6b96a1b90f",
+  "original_shapes": {
+    "activations.voice.base.fit.margin": [
+      100
+    ],
+    "activations.voice.base.fit.greedy_label": [
+      100
+    ],
+    "activations.voice.base.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.voice.base.select.margin": [
+      60
+    ],
+    "activations.voice.base.select.greedy_label": [
+      60
+    ],
+    "activations.voice.base.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.voice.base.eval.margin": [
+      200
+    ],
+    "activations.voice.base.eval.greedy_label": [
+      200
+    ],
+    "activations.voice.base.eval.h": [
+      200,
+      36,
+      2048
+    ],
+    "activations.voice.adapter.fit.margin": [
+      100
+    ],
+    "activations.voice.adapter.fit.greedy_label": [
+      100
+    ],
+    "activations.voice.adapter.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.voice.adapter.select.margin": [
+      60
+    ],
+    "activations.voice.adapter.select.greedy_label": [
+      60
+    ],
+    "activations.voice.adapter.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.voice.adapter.eval.margin": [
+      200
+    ],
+    "activations.voice.adapter.eval.greedy_label": [
+      200
+    ],
+    "activations.voice.adapter.eval.h": [
+      200,
+      36,
+      2048
+    ]
+  },
+  "outputs": [
+    {
+      "file": "activations_adapter_fp16.pt",
+      "shapes": {
+        "activations.voice.adapter.fit.margin": [
+          100
+        ],
+        "activations.voice.adapter.fit.greedy_label": [
+          100
+        ],
+        "activations.voice.adapter.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.voice.adapter.select.margin": [
+          60
+        ],
+        "activations.voice.adapter.select.greedy_label": [
+          60
+        ],
+        "activations.voice.adapter.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.voice.adapter.eval.margin": [
+          200
+        ],
+        "activations.voice.adapter.eval.greedy_label": [
+          200
+        ],
+        "activations.voice.adapter.eval.h": [
+          200,
+          36,
+          2048
+        ]
+      }
+    },
+    {
+      "file": "activations_base_fp16.pt",
+      "shapes": {
+        "activations.voice.base.fit.margin": [
+          100
+        ],
+        "activations.voice.base.fit.greedy_label": [
+          100
+        ],
+        "activations.voice.base.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.voice.base.select.margin": [
+          60
+        ],
+        "activations.voice.base.select.greedy_label": [
+          60
+        ],
+        "activations.voice.base.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.voice.base.eval.margin": [
+          200
+        ],
+        "activations.voice.base.eval.greedy_label": [
+          200
+        ],
+        "activations.voice.base.eval.h": [
+          200,
+          36,
+          2048
+        ]
+      }
+    }
+  ]
+}

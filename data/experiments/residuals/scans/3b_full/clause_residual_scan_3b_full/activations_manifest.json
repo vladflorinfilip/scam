@@ -1,0 +1,150 @@
+{
+  "source_file": "activations.pt",
+  "original_sha256": "1d15030170f0df834ea9318f91fa91874c7fea90c0e80c1a8141692e68dce523",
+  "original_shapes": {
+    "activations.clause.base.fit.margin": [
+      100
+    ],
+    "activations.clause.base.fit.greedy_label": [
+      100
+    ],
+    "activations.clause.base.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.clause.base.select.margin": [
+      60
+    ],
+    "activations.clause.base.select.greedy_label": [
+      60
+    ],
+    "activations.clause.base.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.clause.base.eval.margin": [
+      104
+    ],
+    "activations.clause.base.eval.greedy_label": [
+      104
+    ],
+    "activations.clause.base.eval.h": [
+      104,
+      36,
+      2048
+    ],
+    "activations.clause.adapter.fit.margin": [
+      100
+    ],
+    "activations.clause.adapter.fit.greedy_label": [
+      100
+    ],
+    "activations.clause.adapter.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.clause.adapter.select.margin": [
+      60
+    ],
+    "activations.clause.adapter.select.greedy_label": [
+      60
+    ],
+    "activations.clause.adapter.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.clause.adapter.eval.margin": [
+      104
+    ],
+    "activations.clause.adapter.eval.greedy_label": [
+      104
+    ],
+    "activations.clause.adapter.eval.h": [
+      104,
+      36,
+      2048
+    ]
+  },
+  "outputs": [
+    {
+      "file": "activations_adapter_fp16.pt",
+      "shapes": {
+        "activations.clause.adapter.fit.margin": [
+          100
+        ],
+        "activations.clause.adapter.fit.greedy_label": [
+          100
+        ],
+        "activations.clause.adapter.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.clause.adapter.select.margin": [
+          60
+        ],
+        "activations.clause.adapter.select.greedy_label": [
+          60
+        ],
+        "activations.clause.adapter.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.clause.adapter.eval.margin": [
+          104
+        ],
+        "activations.clause.adapter.eval.greedy_label": [
+          104
+        ],
+        "activations.clause.adapter.eval.h": [
+          104,
+          36,
+          2048
+        ]
+      }
+    },
+    {
+      "file": "activations_base_fp16.pt",
+      "shapes": {
+        "activations.clause.base.fit.margin": [
+          100
+        ],
+        "activations.clause.base.fit.greedy_label": [
+          100
+        ],
+        "activations.clause.base.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.clause.base.select.margin": [
+          60
+        ],
+        "activations.clause.base.select.greedy_label": [
+          60
+        ],
+        "activations.clause.base.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.clause.base.eval.margin": [
+          104
+        ],
+        "activations.clause.base.eval.greedy_label": [
+          104
+        ],
+        "activations.clause.base.eval.h": [
+          104,
+          36,
+          2048
+        ]
+      }
+    }
+  ]
+}

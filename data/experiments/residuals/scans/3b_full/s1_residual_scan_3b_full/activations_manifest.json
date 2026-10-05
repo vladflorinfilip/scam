@@ -1,0 +1,150 @@
+{
+  "source_file": "activations.pt",
+  "original_sha256": "68fb3b70257d13d30531ebb0de4d3a02e7cccbb5e1683e0b80087ec5703cf31c",
+  "original_shapes": {
+    "activations.s1.base.fit.margin": [
+      100
+    ],
+    "activations.s1.base.fit.greedy_label": [
+      100
+    ],
+    "activations.s1.base.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.s1.base.select.margin": [
+      60
+    ],
+    "activations.s1.base.select.greedy_label": [
+      60
+    ],
+    "activations.s1.base.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.s1.base.eval.margin": [
+      200
+    ],
+    "activations.s1.base.eval.greedy_label": [
+      200
+    ],
+    "activations.s1.base.eval.h": [
+      200,
+      36,
+      2048
+    ],
+    "activations.s1.adapter.fit.margin": [
+      100
+    ],
+    "activations.s1.adapter.fit.greedy_label": [
+      100
+    ],
+    "activations.s1.adapter.fit.h": [
+      100,
+      36,
+      2048
+    ],
+    "activations.s1.adapter.select.margin": [
+      60
+    ],
+    "activations.s1.adapter.select.greedy_label": [
+      60
+    ],
+    "activations.s1.adapter.select.h": [
+      60,
+      36,
+      2048
+    ],
+    "activations.s1.adapter.eval.margin": [
+      200
+    ],
+    "activations.s1.adapter.eval.greedy_label": [
+      200
+    ],
+    "activations.s1.adapter.eval.h": [
+      200,
+      36,
+      2048
+    ]
+  },
+  "outputs": [
+    {
+      "file": "activations_adapter_fp16.pt",
+      "shapes": {
+        "activations.s1.adapter.fit.margin": [
+          100
+        ],
+        "activations.s1.adapter.fit.greedy_label": [
+          100
+        ],
+        "activations.s1.adapter.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.s1.adapter.select.margin": [
+          60
+        ],
+        "activations.s1.adapter.select.greedy_label": [
+          60
+        ],
+        "activations.s1.adapter.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.s1.adapter.eval.margin": [
+          200
+        ],
+        "activations.s1.adapter.eval.greedy_label": [
+          200
+        ],
+        "activations.s1.adapter.eval.h": [
+          200,
+          36,
+          2048
+        ]
+      }
+    },
+    {
+      "file": "activations_base_fp16.pt",
+      "shapes": {
+        "activations.s1.base.fit.margin": [
+          100
+        ],
+        "activations.s1.base.fit.greedy_label": [
+          100
+        ],
+        "activations.s1.base.fit.h": [
+          100,
+          36,
+          2048
+        ],
+        "activations.s1.base.select.margin": [
+          60
+        ],
+        "activations.s1.base.select.greedy_label": [
+          60
+        ],
+        "activations.s1.base.select.h": [
+          60,
+          36,
+          2048
+        ],
+        "activations.s1.base.eval.margin": [
+          200
+        ],
+        "activations.s1.base.eval.greedy_label": [
+          200
+        ],
+        "activations.s1.base.eval.h": [
+          200,
+          36,
+          2048
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "clause": {
+    "selected": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 13.544471740722656,
+      "gap_recovery": 0.14525249834900478,
+      "base_preservation": 0.9711538553237915,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_0": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.830378532409668,
+      "gap_recovery": 0.00013355838971418343,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_1": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.829026222229004,
+      "gap_recovery": 0.00021940870549597147,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_2": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.83894157409668,
+      "gap_recovery": -0.0004100593715021805,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_3": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.82662296295166,
+      "gap_recovery": 0.00037197767289387507,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_4": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.833083152770996,
+      "gap_recovery": -3.814224184939263e-05,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    }
+  }
+}
