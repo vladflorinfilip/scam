@@ -96,7 +96,7 @@ def main():
             if annotate and FOLLOW[args.rule] not in row and row.get('critic_scored') is not True:
                 try:
                     annotate(row)
-                except RuntimeError as error:
+                except (RuntimeError, TypeError, KeyError) as error:
                     row[FOLLOW[args.rule]] = None
                     row['critic_error'] = str(error)
                 row['critic_scored'] = True

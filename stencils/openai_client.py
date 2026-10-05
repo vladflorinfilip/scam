@@ -21,10 +21,19 @@ _ANTHROPIC_CLAUSE_ORDER_SYSTEM = (
 )
 
 
+def _decode_json_string(value: Any) -> Any:
+    if isinstance(value, str) and value.lstrip()[:1] in ("[", "{"):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
 def _anthropic_tool_result(response: Any, name: str) -> dict[str, Any]:
     for block in response.content:
         if block.type == "tool_use" and block.name == name:
-            return block.input
+            return {key: _decode_json_string(value) for key, value in block.input.items()}
     raise ValueError(f"Anthropic response did not contain tool call {name!r}")
 
 
