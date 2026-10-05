@@ -337,8 +337,20 @@ def main():
         default=",".join(STAGES),
         help="Comma-separated stages to pull (default: all stages)",
     )
+    parser.add_argument(
+        "--transfer-name",
+        default="four_rule_3b_l30",
+        help="Transfer artifact name (default: four_rule_3b_l30)",
+    )
     args = parser.parse_args()
     VOLUME = args.volume
+    if (
+        not args.transfer_name
+        or "/" in args.transfer_name
+        or "\\" in args.transfer_name
+        or args.transfer_name in {".", ".."}
+    ):
+        parser.error("--transfer-name must be a single directory name")
 
     def parse_filter(value, choices, name):
         parts = (part.strip() for part in value.split(","))
@@ -409,15 +421,18 @@ def main():
                 print(f"SKIPPED stage=scan_late rule={rule}: missing marker {marker}", flush=True)
 
     if "transfer" in selected_stages:
-        remote = "outputs/transfer/four_rule_3b_l30"
+        remote = f"outputs/transfer/{args.transfer_name}"
         marker = f"{remote}/summary.json"
         if volume_file_exists(marker):
-            destination = ROOT / "data/experiments/residuals/transfer/four_rule_3b_l30"
+            destination = ROOT / "data/experiments/residuals/transfer" / args.transfer_name
             pull_directory(remote, destination)
             sanitize_roots.append(destination)
-            print("PULLED stage=transfer", flush=True)
+            print(f"PULLED stage=transfer name={args.transfer_name}", flush=True)
         else:
-            print(f"SKIPPED stage=transfer: missing marker {marker}", flush=True)
+            print(
+                f"SKIPPED stage=transfer name={args.transfer_name}: missing marker {marker}",
+                flush=True,
+            )
 
     sanitize_downloads(sanitize_roots)
 

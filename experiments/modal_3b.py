@@ -21,6 +21,17 @@ VARIANTS = {
 GPU = "A100-80GB"
 TIMEOUT = 2 * 60 * 60
 
+
+def _transfer_out_dir(rules: list[str], variant: str = "") -> str:
+    if variant:
+        name = f"four_rule_3b_l30_{variant}"
+    elif rules == RULES:
+        name = "four_rule_3b_l30"
+    else:
+        name = f"rules_{'-'.join(rules)}_3b_l30"
+    return f"/vol/outputs/transfer/{name}"
+
+
 DATA_FILES = [
     "data/inputs/training_data/synthetic_ethics_cot_training_v2.jsonl",
     "data/inputs/training_data/synthetic_ethics_voice_paired_train.jsonl",
@@ -274,9 +285,14 @@ def scan_rule(
         "/root/.cache/huggingface": hf_cache_volume,
     },
 )
-def transfer_all(layer: int, out_dir: str):
+def transfer_all(
+    layer: int,
+    out_dir: str,
+    rules: list[str] = RULES,
+    variant: str = "",
+):
     _prepare()
-    cfg = _config()
+    cfg = _config(variant)
     out = Path(out_dir)
     if (out / "experiment.json").exists():
         required = ("subspaces.pt", "selection.json", "summary.json", "direction_geometry.json")
@@ -286,7 +302,7 @@ def transfer_all(layer: int, out_dir: str):
         return str(out)
     missing = [
         rule
-        for rule in RULES
+        for rule in rules
         if not (Path(cfg["rules"][rule]["adapter"]) / "adapter_model.safetensors").is_file()
     ]
     if missing:
@@ -294,7 +310,7 @@ def transfer_all(layer: int, out_dir: str):
 
     from experiments.residual import transfer
 
-    transfer(cfg, RULES, RULES, layer, out, ranks=(1, 2, 4, 8), method="consensus")
+    transfer(cfg, rules, rules, layer, out, ranks=(1, 2, 4, 8), method="consensus")
     scam_volume.commit()
     return str(out)
 
@@ -364,6 +380,10 @@ def smoke():
     return {"gpu": torch.cuda.get_device_name(0), "layers": layer_count}
 
 
+def _transfer_rules(rules: list[str], variant: str = "") -> list[str]:
+    return RULES if variant else rules
+
+
 @app.local_entrypoint()
 def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = ""):
     if variant:
@@ -413,6 +433,9 @@ def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = ""):
         ):
             print(f"Late scan finished: {result}")
     elif stage == "transfer":
-        print(transfer_all.remote(30, "/vol/outputs/transfer/four_rule_3b_l30"))
+        transfer_rules = _transfer_rules(selected_rules, variant)
+        out_dir = _transfer_out_dir(transfer_rules, variant)
+        print(f"Transfer output: {out_dir}")
+        print(transfer_all.remote(30, out_dir, transfer_rules, variant))
     else:
         raise ValueError(f"Unknown stage: {stage}")
