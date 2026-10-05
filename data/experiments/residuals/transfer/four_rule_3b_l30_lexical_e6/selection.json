@@ -1,0 +1,206 @@
+{
+  "selected_rank": 8,
+  "passed": false,
+  "scores": {
+    "1": {
+      "s1": {
+        "follow": 0.9833333492279053,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.0,
+        "gap": 10.040103912353516,
+        "gap_recovery": 0.43790513479816917,
+        "base_preservation": 0.949999988079071,
+        "base_agreement": 0.6000000238418579,
+        "predicts_1": 0.4833333194255829,
+        "both_correct": 0.9666666388511658
+      },
+      "voice": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.0,
+        "gap": 10.198958396911621,
+        "gap_recovery": 0.12121642935896293,
+        "base_preservation": 0.7666666507720947,
+        "base_agreement": 0.550000011920929,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 16.209375381469727,
+        "gap_recovery": 0.02476850825359056,
+        "base_preservation": 0.949999988079071,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "lexical": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5,
+        "follow_drop": 0.0,
+        "gap": 14.712240219116211,
+        "gap_recovery": 0.0012170428304029146,
+        "base_preservation": 0.9333333373069763,
+        "base_agreement": 0.5,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    },
+    "2": {
+      "s1": {
+        "follow": 0.9666666388511658,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.016666710376739502,
+        "gap": 10.002082824707031,
+        "gap_recovery": 0.4426368232126655,
+        "base_preservation": 0.9333333373069763,
+        "base_agreement": 0.6166666746139526,
+        "predicts_1": 0.5,
+        "both_correct": 0.9333333373069763
+      },
+      "voice": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.0,
+        "gap": 10.279167175292969,
+        "gap_recovery": 0.11389873610678014,
+        "base_preservation": 0.75,
+        "base_agreement": 0.550000011920929,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 14.792187690734863,
+        "gap_recovery": 0.11161819029922304,
+        "base_preservation": 0.9333333373069763,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "lexical": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5,
+        "follow_drop": 0.0,
+        "gap": 14.734895706176758,
+        "gap_recovery": -0.00031740518355793945,
+        "base_preservation": 0.9166666865348816,
+        "base_agreement": 0.5,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    },
+    "4": {
+      "s1": {
+        "follow": 0.9833333492279053,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.0,
+        "gap": 6.313541412353516,
+        "gap_recovery": 0.9016723150297096,
+        "base_preservation": 0.9166666865348816,
+        "base_agreement": 0.6000000238418579,
+        "predicts_1": 0.5166666507720947,
+        "both_correct": 0.9666666388511658
+      },
+      "voice": {
+        "follow": 0.8666666746139526,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.13333332538604736,
+        "gap": 6.851041793823242,
+        "gap_recovery": 0.4266571458203403,
+        "base_preservation": 0.7666666507720947,
+        "base_agreement": 0.44999998807907104,
+        "predicts_1": 0.36666667461395264,
+        "both_correct": 0.7333333492279053
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 12.915624618530273,
+        "gap_recovery": 0.22661982856143048,
+        "base_preservation": 0.9666666388511658,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "lexical": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5,
+        "follow_drop": 0.0,
+        "gap": 14.713541030883789,
+        "gap_recovery": 0.00112893931587843,
+        "base_preservation": 0.949999988079071,
+        "base_agreement": 0.5,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    },
+    "8": {
+      "s1": {
+        "follow": 0.5333333611488342,
+        "unablated_follow": 0.9833333492279053,
+        "base_follow": 0.5833333134651184,
+        "follow_drop": 0.44999998807907104,
+        "gap": 0.3031249940395355,
+        "gap_recovery": 0.35033704363827767,
+        "base_preservation": 0.9166666865348816,
+        "base_agreement": 0.3499999940395355,
+        "predicts_1": 0.1666666716337204,
+        "both_correct": 0.20000000298023224
+      },
+      "voice": {
+        "follow": 0.6333333253860474,
+        "unablated_follow": 1.0,
+        "base_follow": 0.550000011920929,
+        "follow_drop": 0.36666667461395264,
+        "gap": 4.2947916984558105,
+        "gap_recovery": 0.6598716947918523,
+        "base_preservation": 0.7333333492279053,
+        "base_agreement": 0.38333332538604736,
+        "predicts_1": 0.13333334028720856,
+        "both_correct": 0.2666666805744171
+      },
+      "clause": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5333333611488342,
+        "follow_drop": 0.0,
+        "gap": 10.498958587646484,
+        "gap_recovery": 0.3747206607694098,
+        "base_preservation": 0.8666666746139526,
+        "base_agreement": 0.5333333611488342,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      },
+      "lexical": {
+        "follow": 1.0,
+        "unablated_follow": 1.0,
+        "base_follow": 0.5,
+        "follow_drop": 0.0,
+        "gap": 14.399218559265137,
+        "gap_recovery": 0.02241788759712926,
+        "base_preservation": 0.9333333373069763,
+        "base_agreement": 0.5,
+        "predicts_1": 0.5,
+        "both_correct": 1.0
+      }
+    }
+  }
+}
