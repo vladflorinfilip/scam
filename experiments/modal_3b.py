@@ -1,5 +1,6 @@
 """Modal runner for the Qwen2.5-3B four-rule replication."""
 import os
+import sys
 from pathlib import Path
 
 import modal
@@ -10,7 +11,7 @@ REMOTE_ROOT = Path("/root/scam")
 CONFIG_PATH = "configs/stegano_experiments_3b.yaml"
 RULES = ["s1", "voice", "clause", "lexical"]
 GPU = "A100-80GB"
-TIMEOUT = 6 * 60 * 60
+TIMEOUT = 2 * 60 * 60
 
 DATA_FILES = [
     "data/inputs/training_data/synthetic_ethics_cot_training_v2.jsonl",
@@ -119,6 +120,8 @@ def _map_huggingface_secret():
 def _prepare():
     _map_huggingface_secret()
     os.chdir(REMOTE_ROOT)
+    if str(REMOTE_ROOT) not in sys.path:
+        sys.path.insert(0, str(REMOTE_ROOT))
     checkpoints = REMOTE_ROOT / "checkpoints"
     volume_checkpoints = Path("/vol/checkpoints")
     volume_checkpoints.mkdir(parents=True, exist_ok=True)
