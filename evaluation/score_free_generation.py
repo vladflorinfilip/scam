@@ -60,7 +60,8 @@ def summarize(rows, rule):
     return {'n': n, 'parsed': len(parsed), 'follow_field': key,
             'follow_rate_all': follows / n if n else None,
             'follow_rate_parsed': follows / len(parsed) if parsed else None,
-            'accuracy_all': sum(r.get('prediction') == r['gold'] for r in rows) / n if n else None}
+            'accuracy_all': sum(r.get('prediction') == r['gold'] for r in rows) / n if n else None,
+            'critic_errors': sum('critic_error' in r for r in rows)}
 
 
 def main():
@@ -93,7 +94,11 @@ def main():
             if args.rule in ('s1', 'voice'):
                 row['chain_of_thought'] = clean_chain_of_thought(row['raw_generation'])
             if annotate and FOLLOW[args.rule] not in row and row.get('critic_scored') is not True:
-                annotate(row)
+                try:
+                    annotate(row)
+                except RuntimeError as error:
+                    row[FOLLOW[args.rule]] = None
+                    row['critic_error'] = str(error)
                 row['critic_scored'] = True
                 if i % 10 == 0:
                     write(out, rows)

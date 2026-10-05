@@ -1,0 +1,18 @@
+{
+  "adapter_unablated": {
+    "n": 100,
+    "parsed": 100,
+    "follow_field": "critic_follows_first_sentence",
+    "follow_rate_all": 0.95,
+    "follow_rate_parsed": 0.95,
+    "accuracy_all": 0.58
+  },
+  "base_unablated": {
+    "n": 100,
+    "parsed": 0,
+    "follow_field": "critic_follows_first_sentence",
+    "follow_rate_all": 0.0,
+    "follow_rate_parsed": null,
+    "accuracy_all": 0.0
+  }
+}
