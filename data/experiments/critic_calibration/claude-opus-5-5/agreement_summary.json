@@ -1,0 +1,79 @@
+{
+  "reference": "Azure gpt-4.1 (datazone) labels committed on main",
+  "candidate": "claude-opus-5-5 via stencils/openai_client.py CRITIC_BACKEND=anthropic",
+  "notes": "Rows aligned by index with identical chain_of_thought; rows with null labels dropped (1 voice row: no tool call after retries). Anthropic clause critic uses a rephrased system prompt (see stencils/openai_client.py).",
+  "files": {
+    "baselines/clause_order/base_ethics_critic.jsonl": {
+      "n": 100,
+      "follow_agreement": 1.0,
+      "label_agreement": 1.0,
+      "follow_rate_gpt41": 0.0,
+      "follow_rate_claude": 0.0,
+      "label_field": "critic_order",
+      "follow_field": "critic_follows_clause_order"
+    },
+    "baselines/clause_order/lora_ethics_critic.jsonl": {
+      "n": 100,
+      "follow_agreement": 1.0,
+      "label_agreement": 1.0,
+      "follow_rate_gpt41": 0.97,
+      "follow_rate_claude": 0.97,
+      "label_field": "critic_order",
+      "follow_field": "critic_follows_clause_order"
+    },
+    "baselines/clause_order/base_pairs_critic.jsonl": {
+      "n": 104,
+      "follow_agreement": 1.0,
+      "label_agreement": 1.0,
+      "follow_rate_gpt41": 0.6442307692307693,
+      "follow_rate_claude": 0.6442307692307693,
+      "label_field": "critic_order",
+      "follow_field": "critic_follows_clause_order"
+    },
+    "baselines/clause_order/lora_pairs_critic.jsonl": {
+      "n": 104,
+      "follow_agreement": 1.0,
+      "label_agreement": 1.0,
+      "follow_rate_gpt41": 1.0,
+      "follow_rate_claude": 1.0,
+      "label_field": "critic_order",
+      "follow_field": "critic_follows_clause_order"
+    },
+    "residuals/ablations/shared_svd_05b_l18/s1/critic/baseline.jsonl": {
+      "n": 100,
+      "follow_agreement": 0.93,
+      "label_agreement": 0.93,
+      "follow_rate_gpt41": 0.95,
+      "follow_rate_claude": 0.98,
+      "label_field": "critic_first_sentence_stance",
+      "follow_field": "critic_follows_first_sentence"
+    },
+    "residuals/ablations/shared_svd_05b_l18/voice/critic/baseline.jsonl": {
+      "n": 99,
+      "follow_agreement": 0.98989898989899,
+      "label_agreement": 0.98989898989899,
+      "follow_rate_gpt41": 0.9797979797979798,
+      "follow_rate_claude": 0.98989898989899,
+      "label_field": "critic_cot_voice",
+      "follow_field": "critic_follows_voice"
+    },
+    "residuals/ablations/l14/third_rule_l14/unablated_critic.jsonl": {
+      "n": 104,
+      "follow_agreement": 1.0,
+      "label_agreement": 1.0,
+      "follow_rate_gpt41": 0.5,
+      "follow_rate_claude": 0.5,
+      "label_field": "critic_order",
+      "follow_field": "critic_follows_clause_order"
+    },
+    "residuals/ablations/l14/third_rule_l14/own_critic.jsonl": {
+      "n": 104,
+      "follow_agreement": 1.0,
+      "label_agreement": 1.0,
+      "follow_rate_gpt41": 0.5,
+      "follow_rate_claude": 0.5,
+      "label_field": "critic_order",
+      "follow_field": "critic_follows_clause_order"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 accelerate
+anthropic
 datasets<4
 matplotlib
 numpy<2
