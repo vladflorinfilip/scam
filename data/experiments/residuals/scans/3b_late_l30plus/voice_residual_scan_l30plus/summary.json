@@ -1,0 +1,76 @@
+{
+  "voice": {
+    "selected": {
+      "follow": 0.5,
+      "unablated_follow": 0.9950000047683716,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.4950000047683716,
+      "gap": 0.5920312404632568,
+      "gap_recovery": 0.9290333089289458,
+      "base_preservation": 0.9049999713897705,
+      "base_agreement": 0.4399999976158142,
+      "predicts_1": 0.0,
+      "both_correct": 0.0
+    },
+    "random_0": {
+      "follow": 0.9950000047683716,
+      "unablated_follow": 0.9950000047683716,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 11.318281173706055,
+      "gap_recovery": 0.000378817250266672,
+      "base_preservation": 1.0,
+      "base_agreement": 0.48500001430511475,
+      "predicts_1": 0.4950000047683716,
+      "both_correct": 0.9900000095367432
+    },
+    "random_1": {
+      "follow": 0.9950000047683716,
+      "unablated_follow": 0.9950000047683716,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 11.32046890258789,
+      "gap_recovery": 0.00018940862513339152,
+      "base_preservation": 1.0,
+      "base_agreement": 0.48500001430511475,
+      "predicts_1": 0.4950000047683716,
+      "both_correct": 0.9900000095367432
+    },
+    "random_2": {
+      "follow": 0.9950000047683716,
+      "unablated_follow": 0.9950000047683716,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 11.335156440734863,
+      "gap_recovery": -0.0010822052526691106,
+      "base_preservation": 1.0,
+      "base_agreement": 0.48500001430511475,
+      "predicts_1": 0.4950000047683716,
+      "both_correct": 0.9900000095367432
+    },
+    "random_3": {
+      "follow": 0.9950000047683716,
+      "unablated_follow": 0.9950000047683716,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 11.322343826293945,
+      "gap_recovery": 2.70819655814325e-05,
+      "base_preservation": 0.9950000047683716,
+      "base_agreement": 0.48500001430511475,
+      "predicts_1": 0.4950000047683716,
+      "both_correct": 0.9900000095367432
+    },
+    "random_4": {
+      "follow": 0.9950000047683716,
+      "unablated_follow": 0.9950000047683716,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 11.32796859741211,
+      "gap_recovery": -0.00045989801307433353,
+      "base_preservation": 0.9950000047683716,
+      "base_agreement": 0.48500001430511475,
+      "predicts_1": 0.4950000047683716,
+      "both_correct": 0.9900000095367432
+    }
+  }
+}
