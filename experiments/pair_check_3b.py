@@ -44,7 +44,8 @@ for d in sorted(ROOT.rglob("unablated.jsonl")):
         continue
     keys = sorted(U); pairs = sorted({p for p, s in keys if (p, "pos") in U and (p, "neg") in U})
     keys = [k for k in keys if k[0] in set(pairs)]; kp = np.array([k[0] for k in keys])
-    _, _, u_ok, u_gap = stats(U, keys, pairs); bm, by, b_ok, b_gap = stats(B, keys, pairs)
+    um, uy, u_ok, u_gap = stats(U, keys, pairs); bm, by, b_ok, b_gap = stats(B, keys, pairs)
+    u_xfit, b_xfit = xfit(um, uy, kp, pairs, rng), xfit(bm, by, kp, pairs, rng)
     for f in sorted(d.glob("*.jsonl")):
         arm = f.stem
         if arm in SKIP or arm.startswith("base_") or arm.endswith("_critic"):
@@ -56,6 +57,8 @@ for d in sorted(ROOT.rglob("unablated.jsonl")):
         r = {"pairs": len(pairs), "unablated_pair_ok": u_ok, "base_pair_ok": b_ok, "pair_ok": ok,
              "unablated_gap": u_gap, "base_gap": b_gap, "gap": gap,
              "follow_at_0": float(((m > 0) == (y == 1)).mean()), "follow_xfit": xfit(m, y, kp, pairs, rng),
+             "unablated_follow_xfit": u_xfit, "base_follow_xfit": b_xfit,
+             "unablated_follow_at_0": float(((um > 0) == (uy == 1)).mean()), "base_follow_at_0": float(((bm > 0) == (by == 1)).mean()),
              "predicts_1": float((m > 0).mean())}
         if (d / f"base_{arm}.jsonl").exists():
             BA = load(d / f"base_{arm}.jsonl")
