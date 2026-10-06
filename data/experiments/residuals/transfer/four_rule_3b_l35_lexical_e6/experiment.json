@@ -1,0 +1,84 @@
+{
+  "config": {
+    "base_model": "Qwen/Qwen2.5-3B-Instruct",
+    "seed": 0,
+    "fit_pairs": 50,
+    "selection_pairs": 30,
+    "batch_size": 8,
+    "max_length": 1024,
+    "free_limit": 100,
+    "free_max_tokens": 256,
+    "training": {
+      "epochs": 6,
+      "learning_rate": 0.0002,
+      "max_length": 512,
+      "lora_r": 8,
+      "lora_alpha": 16
+    },
+    "rules": {
+      "s1": {
+        "train": "data/inputs/training_data/synthetic_ethics_cot_training_v2.jsonl",
+        "eval": "data/inputs/validation_data/synthetic_ethics_cot_val_v2.jsonl",
+        "adapter": "checkpoints/qwen3b-cot-sft-s1",
+        "saved_splits": "data/experiments/residuals/ablations/l18/third_rule_l18/splits.json"
+      },
+      "voice": {
+        "train": "data/inputs/training_data/synthetic_ethics_voice_paired_train.jsonl",
+        "eval": "data/inputs/validation_data/synthetic_ethics_voice_paired_val.jsonl",
+        "adapter": "checkpoints/qwen3b-cot-sft-voice",
+        "saved_splits": "data/experiments/residuals/ablations/l18/third_rule_l18/splits.json"
+      },
+      "clause": {
+        "train": "data/inputs/training_data/synthetic_ethics_clause_order_paired_train.jsonl",
+        "eval": "data/inputs/validation_data/synthetic_ethics_clause_order_paired_eval.jsonl",
+        "adapter": "checkpoints/qwen3b-cot-sft-clause",
+        "saved_splits": "data/experiments/residuals/ablations/l18/third_rule_l18/splits.json"
+      },
+      "lexical": {
+        "train": "data/inputs/training_data/synthetic_ethics_lexical_paired_train.jsonl",
+        "eval": "data/inputs/validation_data/synthetic_ethics_lexical_paired_eval.jsonl",
+        "adapter": "checkpoints/qwen3b-cot-sft-lexical-e6"
+      }
+    },
+    "variant": "lexical_e6"
+  },
+  "hashes": {
+    "s1/train": "9118bba6702f52ac71e2f74aa9ff958c3a1ec43cbde4d478668c326545c88822",
+    "s1/eval": "ead8d6cd1adb3205293df71045ee1abf892346d4179b27e3b3ef5b1c982a7590",
+    "s1/adapter": "ede052047d3ad0792be5184f77307d21fcf21504f4f26f780b5b62b87e1c8288",
+    "voice/train": "9475c0c162539c177347ba7332fceb02a6a1c019da76339b60ddc3a6d5d4a8c2",
+    "voice/eval": "1214fc2820ec18a6157cf9e2fdd53307efb045217414ce5323e68f69379c8dfd",
+    "voice/adapter": "3bef8225b35587f2a7802409357a6cbe944c940e79d60b82d3c63365ca0fb0d2",
+    "clause/train": "17683494a364b760d393ab0f24a81e715d9c786d228191513324392fde0ee305",
+    "clause/eval": "53cbf2e0d907e2cfaf4bbb80a1df33ebbe472049c0c332518f7bf0d86b95a9b3",
+    "clause/adapter": "12e6b13890a41a48e5820936d7d6c6e7750c5863783a2dc4a44c3bc2d493f106",
+    "lexical/train": "7a5dc4236faa926a93c6a7b7430361503e07f2a31fd2eb87d636cff399437134",
+    "lexical/eval": "42e7dfedaf9ad4b18622b0d075be53d2e685e56798d358409b69c2ce675d8e1d",
+    "lexical/adapter": "52169e816cf19dd75a6e548cb035a98f785ab527a839d16aa957f18e76fc2991"
+  },
+  "position": "after supplied space in Final answer: ",
+  "projection_strength": 1,
+  "status": "exploratory; evaluation scenarios previously inspected",
+  "rules": [
+    "s1",
+    "voice",
+    "clause",
+    "lexical"
+  ],
+  "sources": [
+    "s1",
+    "voice",
+    "clause",
+    "lexical"
+  ],
+  "targets": [
+    "s1",
+    "voice",
+    "clause",
+    "lexical"
+  ],
+  "layer": 35,
+  "rank": 8,
+  "method": "consensus",
+  "selection_passed": false
+}
