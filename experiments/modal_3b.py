@@ -11,8 +11,8 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-if Path("/root/scam").is_dir() and "/root/scam" not in sys.path:
-    sys.path.insert(0, "/root/scam")
+if "/root/scam" not in sys.path:
+    sys.path.append("/root/scam")
 
 from experiments.variants_3b import SEED0_ALIASES, VARIANTS
 
