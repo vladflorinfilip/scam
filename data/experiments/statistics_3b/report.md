@@ -1,6 +1,6 @@
 # Qwen2.5-3B: statistical analysis (3 training seeds + bootstrap CIs)
 
-Branch `statistical-analysis`. Seeds 1 and 2 retrain every rule with the same data, splits and recipe (only training RNG changes); seed 0 is the original run. Every seed with ≥90% held-out follow was rescanned over layers 24–35 with 5 random controls, and free generation was run at the selected (base-safe) layer and at the strongest layer. Intervals are 95% bootstrap (10,000 resamples; matched pairs for held-out, prompts for free generation). Full tables: `report_tables.md`; raw numbers: `stats.json` (from `experiments/stats_3b.py`, rendered by `experiments/report_stats_3b.py`).
+Branch `statistical-analysis`. Seeds 1 and 2 retrain every rule with the same data, splits and recipe (only training RNG changes); seed 0 is the original run. Every seed with ≥90% held-out follow was rescanned over layers 24–35 with 5 random controls, and free generation was run at the selected (base-safe) layer and at the strongest layer. Intervals are 95% bootstrap (10,000 resamples; matched pairs for held-out, prompts for free generation). Full tables: `report_tables.md`; raw numbers: `stats.json` (from `experiments/stats_3b.py`, rendered by `experiments/report_stats_3b.py`). Figures (`experiments/plot_stats_3b.py`): `seeds_layer_scans.png` (per-seed layer curves), `seeds_training_and_free.png` (training and free-generation CIs).
 
 ## What holds up across seeds
 
