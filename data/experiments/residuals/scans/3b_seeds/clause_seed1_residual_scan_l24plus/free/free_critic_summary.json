@@ -1,0 +1,38 @@
+{
+  "adapter_selected": {
+    "n": 100,
+    "parsed": 100,
+    "follow_field": "critic_follows_clause_order",
+    "follow_rate_all": 0.66,
+    "follow_rate_parsed": 0.66,
+    "accuracy_all": 0.5,
+    "critic_errors": 2
+  },
+  "adapter_unablated": {
+    "n": 100,
+    "parsed": 100,
+    "follow_field": "critic_follows_clause_order",
+    "follow_rate_all": 1.0,
+    "follow_rate_parsed": 1.0,
+    "accuracy_all": 0.44,
+    "critic_errors": 0
+  },
+  "base_selected": {
+    "n": 100,
+    "parsed": 0,
+    "follow_field": "critic_follows_clause_order",
+    "follow_rate_all": 0.0,
+    "follow_rate_parsed": null,
+    "accuracy_all": 0.0,
+    "critic_errors": 2
+  },
+  "base_unablated": {
+    "n": 100,
+    "parsed": 0,
+    "follow_field": "critic_follows_clause_order",
+    "follow_rate_all": 0.0,
+    "follow_rate_parsed": null,
+    "accuracy_all": 0.0,
+    "critic_errors": 0
+  }
+}

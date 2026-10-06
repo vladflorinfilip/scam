@@ -1,0 +1,76 @@
+{
+  "clause": {
+    "selected": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 4.288161277770996,
+      "gap_recovery": 0.7322408340382622,
+      "base_preservation": 0.9711538553237915,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_0": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.79296875,
+      "gap_recovery": 0.00011470132756696838,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_1": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.790565490722656,
+      "gap_recovery": 0.0002676364309895929,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_2": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.78515625,
+      "gap_recovery": 0.0006118617907566737,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_3": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.778244972229004,
+      "gap_recovery": 0.0010516715901629503,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_4": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 15.794771194458008,
+      "gap_recovery": 0.0,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    }
+  }
+}

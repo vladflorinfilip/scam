@@ -1,0 +1,76 @@
+{
+  "clause": {
+    "selected": {
+      "follow": 0.5,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.5,
+      "gap": 1.730769157409668,
+      "gap_recovery": 0.84832082258317,
+      "base_preservation": 0.9711538553237915,
+      "base_agreement": 0.45192307233810425,
+      "predicts_1": 0.0,
+      "both_correct": 0.0
+    },
+    "random_0": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 10.961538314819336,
+      "gap_recovery": -0.00011044585138475504,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_1": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 10.966947555541992,
+      "gap_recovery": -0.000607627493491858,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_2": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 10.958833694458008,
+      "gap_recovery": 0.0001381449696686854,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_3": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 10.9375,
+      "gap_recovery": 0.0020989971089373505,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_4": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.5096153616905212,
+      "follow_drop": 0.0,
+      "gap": 10.956730842590332,
+      "gap_recovery": 0.00033142520959206223,
+      "base_preservation": 1.0,
+      "base_agreement": 0.5096153616905212,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    }
+  }
+}
