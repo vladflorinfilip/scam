@@ -1,0 +1,16 @@
+{
+  "layer": 31,
+  "same_as_selected": true,
+  "selection_metrics": {
+    "follow": 0.800000011920929,
+    "unablated_follow": 1.0,
+    "base_follow": 0.5833333134651184,
+    "follow_drop": 0.19999998807907104,
+    "gap": 3.336458444595337,
+    "gap_recovery": 0.7483066612286363,
+    "base_preservation": 0.9833333492279053,
+    "base_agreement": 0.5833333134651184,
+    "predicts_1": 0.6333333253860474,
+    "both_correct": 0.6000000238418579
+  }
+}
