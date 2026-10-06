@@ -4,15 +4,22 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from experiments.variants_3b import SEED0_ALIASES, VARIANTS
+
+
 VOLUME = "scam-3b"
 RULES = ("s1", "voice", "clause", "lexical")
-PULL_RULES = (*RULES, "lexical_e6")
-STAGES = ("adapter", "baseline", "scan_full", "scan_late", "transfer")
+PULL_RULES = (*RULES, *VARIANTS)
+STAGES = ("adapter", "baseline", "scan_full", "scan_late", "scan_seed", "transfer")
 LIMIT = 95 * 1024 * 1024
 SKIP_TRAINING_FILES = {"optimizer.pt", "scheduler.pt", "rng_state.pth"}
 LOCAL_CRITIC_FILES = {
@@ -377,7 +384,9 @@ def main():
         if "adapter" in selected_stages:
             remote = f"checkpoints/qwen3b-cot-sft-{rule.replace('_', '-')}"
             marker = f"{remote}/adapter_model.safetensors"
-            if volume_file_exists(marker):
+            if rule in SEED0_ALIASES:
+                print(f"SKIPPED stage=adapter rule={rule}: seed-0 scan-only alias", flush=True)
+            elif volume_file_exists(marker):
                 files = files_under(remote)
                 for file in files:
                     pull_file(file, ROOT / file)
@@ -388,7 +397,9 @@ def main():
         if "baseline" in selected_stages:
             remote = f"outputs/baselines/{rule}"
             marker = f"{remote}/experiment.json"
-            if volume_file_exists(marker):
+            if rule in SEED0_ALIASES:
+                print(f"SKIPPED stage=baseline rule={rule}: seed-0 scan-only alias", flush=True)
+            elif volume_file_exists(marker):
                 pull_directory(remote, ROOT / "data/experiments/baselines/3b" / rule)
                 print(f"PULLED stage=baseline rule={rule}", flush=True)
             else:
@@ -419,6 +430,20 @@ def main():
                 print(f"PULLED stage=scan_late rule={rule}", flush=True)
             else:
                 print(f"SKIPPED stage=scan_late rule={rule}: missing marker {marker}", flush=True)
+
+        if "scan_seed" in selected_stages:
+            scan_name = f"{rule}_residual_scan_l24plus"
+            remote = f"outputs/scans/3b_seeds/{scan_name}"
+            marker = f"{remote}/free/free_summary.json"
+            if volume_file_exists(marker):
+                destination = (
+                    ROOT / "data/experiments/residuals/scans/3b_seeds" / scan_name
+                )
+                pull_directory(remote, destination)
+                sanitize_roots.append(destination)
+                print(f"PULLED stage=scan_seed rule={rule}", flush=True)
+            else:
+                print(f"SKIPPED stage=scan_seed rule={rule}: missing marker {marker}", flush=True)
 
     if "transfer" in selected_stages:
         remote = f"outputs/transfer/{args.transfer_name}"

@@ -5,6 +5,7 @@ import random
 from pathlib import Path
 
 import torch
+import transformers
 from datasets import Dataset
 from transformers import (
     AutoModelForCausalLM,
@@ -137,6 +138,7 @@ def main() -> None:
         help="Fallback: held-out fraction split from --data when --val-data is absent. 0 disables.",
     )
     parser.add_argument("--seed", type=int, default=42, help="Shuffle seed for the train/val split.")
+    parser.add_argument("--training-seed", type=int, default=None)
     parser.add_argument(
         "--dtype",
         choices=["auto", "float32", "float16", "bfloat16"],
@@ -144,6 +146,8 @@ def main() -> None:
         help="Training dtype. On MPS, auto uses float32 for stable LoRA training.",
     )
     args = parser.parse_args()
+    if args.training_seed is not None:
+        transformers.set_seed(args.training_seed)
 
     load_env()
     hf_token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN")
@@ -211,6 +215,11 @@ def main() -> None:
     elif args.learning_rate is None:
         args.learning_rate = 2e-5
 
+    training_seed_kwargs = (
+        {"seed": args.training_seed, "data_seed": args.training_seed}
+        if args.training_seed is not None
+        else {}
+    )
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         per_device_train_batch_size=args.batch_size,
@@ -229,6 +238,7 @@ def main() -> None:
         bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
         fp16=torch.cuda.is_available() and not torch.cuda.is_bf16_supported(),
         **eval_strategy_kwarg("epoch" if eval_dataset is not None else "no"),
+        **training_seed_kwargs,
     )
 
     trainer = Trainer(
