@@ -48,3 +48,37 @@ CPU only. Code: `experiments/kernel/l35.py` (analysis), `experiments/kernel/read
   Smallest test (GPU): run each adapter on another rule's pairs, where its answer no longer tracks that cue.
 - Two seed sets; lexical and clause have 52 held-out pairs, s1 and voice 100.
 - 0.5B layers 20–22 not done: the 0.5B voice, clause and lexical adapters are not available.
+
+## Label-flip control: cue or answer? (3B, layer 35)
+
+**Question.** The leave-one-rule-out probes read a shared signal for s1, voice and clause. Is it the hidden cue
+(shared steganography) or the adapter's own answer? In normal adapters the answer always equals the cue, so
+they cannot tell the two apart.
+
+**Design.** Two new adapters, `checkpoints/qwen3b-cot-sft-{clause,voice}-flip`: same rows, splits, recipe and
+training seed as seed 0, with `final_answer = 1 - cue label` (`data/inputs/training_data/kernel_flip/`).
+Activations: Modal stage `flip` (`experiments/modal_3b.py`, layers 24-35, `flip/{rule}_flip/`). Probes are
+the same l35 kernel-ridge probes, trained on the other three *normal* seed-0 adapters and scored on the
+flipped adapter's held-out pairs, oriented by the cue (`experiments/kernel/flip.py`, plot `plot_flip.py`).
+Prediction: a cue code gives a positive score; an answer code gives a negative one. Primary family: readout and
+base-answer removed (perp_r_a) x {linear, rbf} x {clause, voice}, two-sided sign-flip test (1000), Holm.
+
+**Checks.** Both flipped adapters learned the reversed rule: they follow the cue 0% of the time on fit, select
+and eval (base about 50%). Base activations are identical to the earlier run.
+
+**Result.** The probe score reverses for every one of the 8 tests, in both spaces (`flip/results.json`):
+
+| Rule | Probe | Normal z (95% CI) | Flipped z (95% CI) | Holm p |
+|---|---|---:|---:|---:|
+| clause | linear | 5.0 (4.2, 6.6) | -6.9 (-9.0, -5.8) | 0.004 |
+| clause | rbf | 6.9 (5.8, 8.7) | -4.8 (-6.0, -4.2) | 0.007 |
+| voice | linear | 2.8 (2.4, 3.4) | -5.6 (-6.5, -4.9) | 0.004 |
+| voice | rbf | 4.9 (4.1, 6.0) | -5.4 (-6.3, -4.8) | 0.004 |
+
+(perp_r_a space; raw space is the same: -6.3 to -9.2.) Every held-out flipped pair scores negative.
+
+**Conclusion.** The shared layer-35 signal follows the adapter's answer, not the hidden cue, even after the
+readout and the base model's answer direction are removed. It is a shared "this model is answering 1" code
+specific to fine-tuned models, not a common steganographic code. So at layer 35 we find no evidence of a
+common steganography representation. Caveats: one flipped seed per rule; layer 35 only; a cue code shared
+weakly underneath the answer code is not excluded, but none is detectable with these probes.

@@ -1,0 +1,30 @@
+{
+  "base": {
+    "fit": {
+      "follow_original_cue": 0.5299999713897705,
+      "label_tokens": 1.0
+    },
+    "select": {
+      "follow_original_cue": 0.5333333611488342,
+      "label_tokens": 1.0
+    },
+    "eval": {
+      "follow_original_cue": 0.5096153616905212,
+      "label_tokens": 1.0
+    }
+  },
+  "adapter": {
+    "fit": {
+      "follow_original_cue": 0.0,
+      "label_tokens": 1.0
+    },
+    "select": {
+      "follow_original_cue": 0.0,
+      "label_tokens": 1.0
+    },
+    "eval": {
+      "follow_original_cue": 0.0,
+      "label_tokens": 1.0
+    }
+  }
+}
