@@ -1,0 +1,76 @@
+{
+  "voice": {
+    "selected": {
+      "follow": 0.9900000095367432,
+      "unablated_follow": 1.0,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.009999990463256836,
+      "gap": 6.914531230926514,
+      "gap_recovery": 0.19176020775049107,
+      "base_preservation": 0.9750000238418579,
+      "base_agreement": 0.49000000953674316,
+      "predicts_1": 0.5,
+      "both_correct": 0.9800000190734863
+    },
+    "random_0": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 8.60953140258789,
+      "gap_recovery": -5.309751202942081e-05,
+      "base_preservation": 1.0,
+      "base_agreement": 0.49000000953674316,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_1": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 8.610937118530273,
+      "gap_recovery": -0.0002121742045730901,
+      "base_preservation": 0.9950000047683716,
+      "base_agreement": 0.49000000953674316,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_2": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 8.609375,
+      "gap_recovery": -3.539834135302122e-05,
+      "base_preservation": 1.0,
+      "base_agreement": 0.49000000953674316,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_3": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 8.608749389648438,
+      "gap_recovery": 3.539834135302122e-05,
+      "base_preservation": 0.9900000095367432,
+      "base_agreement": 0.49000000953674316,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    },
+    "random_4": {
+      "follow": 1.0,
+      "unablated_follow": 1.0,
+      "base_follow": 0.49000000953674316,
+      "follow_drop": 0.0,
+      "gap": 8.604218482971191,
+      "gap_recovery": 0.0005481346821090138,
+      "base_preservation": 1.0,
+      "base_agreement": 0.49000000953674316,
+      "predicts_1": 0.5,
+      "both_correct": 1.0
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "rule": "voice",
+  "backend": "anthropic",
+  "deployment": "claude-opus-5-5",
+  "chain_of_thought": "raw_generation truncated before the first \"Final answer:\" marker",
+  "follow_rate_all": "rows judged following / all rows (unparsed or unresolved count as not following)",
+  "s1_scope": "first_sentence",
+  "clause_prompt_sha256": "e9a332fc9396550fa8b5a89e3897307c0bd53fd55e69abef2f449ccf8642fdc2"
+}
