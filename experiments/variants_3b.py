@@ -35,3 +35,13 @@ VARIANTS["lexical_e6_seed0"] = {
 }
 
 SEED0_ALIASES = tuple(name for name in VARIANTS if name.endswith("_seed0"))
+
+# Label-flipped adapters (same data, splits, recipe; final_answer = 1 - cue label). Used to tell a shared
+# cue code from the adapter's own answer code (kernel-exploration).
+for rule in ("clause", "voice"):
+    VARIANTS[f"{rule}_flip"] = {
+        "rule": rule,
+        "training": {},
+        "train": f"data/inputs/training_data/kernel_flip/{rule}_flipped_train.jsonl",
+        "adapter": f"checkpoints/qwen3b-cot-sft-{rule}-flip",
+    }

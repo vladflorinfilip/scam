@@ -45,6 +45,8 @@ DATA_FILES = [
     "data/inputs/validation_data/synthetic_ethics_lexical_paired_eval.jsonl",
     "data/experiments/residuals/ablations/l18/third_rule_l18/splits.json",
     "data/experiments/baselines/clause_order/base_ethics.jsonl",
+    "data/inputs/training_data/kernel_flip/clause_flipped_train.jsonl",
+    "data/inputs/training_data/kernel_flip/voice_flipped_train.jsonl",
 ]
 
 
@@ -172,6 +174,8 @@ def _config(variant: str = ""):
         spec = VARIANTS[variant]
         cfg["training"].update(spec["training"])
         cfg["rules"][spec["rule"]]["adapter"] = spec["adapter"]
+        if "train" in spec:
+            cfg["rules"][spec["rule"]]["train"] = spec["train"]
         cfg["variant"] = variant
     return cfg
 
@@ -466,6 +470,58 @@ def smoke():
     return {"gpu": torch.cuda.get_device_name(0), "layers": layer_count}
 
 
+@app.function(
+    image=image,
+    gpu=GPU,
+    timeout=TIMEOUT,
+    secrets=[huggingface_secret],
+    volumes={
+        "/vol": scam_volume,
+        "/root/.cache/huggingface": hf_cache_volume,
+    },
+)
+def flip_collect(variant: str):
+    """Train a label-flipped adapter, then save answer-position activations (layers 24-35) for it and
+    the base model on the rule's usual fit/select/eval pairs. Pairs keep the original cue orientation
+    (pos = cue says 1), so the flipped adapter should answer 1 on neg and 0 on pos."""
+    _prepare()
+    spec = VARIANTS[variant]
+    assert "train" in spec, variant
+    rule = spec["rule"]
+    cfg = _config(variant)
+    adapter = Path(cfg["rules"][rule]["adapter"])
+    if not (adapter / "adapter_model.safetensors").exists():
+        from experiments.colab import train
+
+        train(cfg, rule)
+        scam_volume.commit()
+    out = Path("/vol/outputs/kernel") / variant
+    if (out / "activations.pt").exists():
+        print(f"Activations already collected for {variant}; skipping.")
+        return str(out)
+    import torch
+
+    from experiments.data import save, splits
+    from experiments.residual import follow, forward, loaded, texts
+
+    out.mkdir(parents=True, exist_ok=True)
+    layers = list(range(24, 36))
+    data = splits(cfg, rule)
+    acts = {}
+    for arm, path in [("base", cfg["base_model"]), ("adapter", str(adapter))]:
+        with loaded(path) as (tok, model):
+            acts[arm] = {name: forward(model, tok, texts(pairs), cfg, layers) for name, pairs in data.items()}
+        print("Collected", variant, arm, flush=True)
+    summary = {arm: {name: {"follow_original_cue": float(follow(v["margin"])),
+                            "label_tokens": float((v["greedy_label"] >= 0).float().mean())}
+                     for name, v in acts[arm].items()} for arm in acts}
+    save(out / "summary.json", summary)
+    save(out / "splits.json", data)
+    torch.save({"layers": layers, "activations": {rule: acts}}, out / "activations.pt")
+    scam_volume.commit()
+    return summary
+
+
 def _transfer_rules(rules: list[str], variant: str = "") -> list[str]:
     return RULES if variant else rules
 
@@ -577,6 +633,11 @@ def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = "", 
             return_exceptions=True,
         )
         _print_map_results("Strongest-layer free generation", selected_variants, results)
+    elif stage == "flip":
+        if not selected_variants:
+            raise ValueError("flip requires --variant")
+        results = flip_collect.map(selected_variants, return_exceptions=True)
+        _print_map_results("Flip train/collect", selected_variants, results)
     elif stage == "transfer":
         transfer_variant = selected_variants[0] if selected_variants else ""
         transfer_rules = _transfer_rules(selected_rules, transfer_variant)
