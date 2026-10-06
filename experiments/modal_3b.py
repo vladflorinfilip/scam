@@ -22,13 +22,13 @@ GPU = "A100-80GB"
 TIMEOUT = 2 * 60 * 60
 
 
-def _transfer_out_dir(rules: list[str], variant: str = "") -> str:
+def _transfer_out_dir(rules: list[str], variant: str = "", layer: int = 30) -> str:
     if variant:
-        name = f"four_rule_3b_l30_{variant}"
+        name = f"four_rule_3b_l{layer}_{variant}"
     elif rules == RULES:
-        name = "four_rule_3b_l30"
+        name = f"four_rule_3b_l{layer}"
     else:
-        name = f"rules_{'-'.join(rules)}_3b_l30"
+        name = f"rules_{'-'.join(rules)}_3b_l{layer}"
     return f"/vol/outputs/transfer/{name}"
 
 
@@ -385,7 +385,7 @@ def _transfer_rules(rules: list[str], variant: str = "") -> list[str]:
 
 
 @app.local_entrypoint()
-def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = ""):
+def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = "", layer: int = 30):
     if variant:
         if variant not in VARIANTS:
             raise ValueError(f"Unknown variant: {variant}")
@@ -434,8 +434,8 @@ def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = ""):
             print(f"Late scan finished: {result}")
     elif stage == "transfer":
         transfer_rules = _transfer_rules(selected_rules, variant)
-        out_dir = _transfer_out_dir(transfer_rules, variant)
+        out_dir = _transfer_out_dir(transfer_rules, variant, layer)
         print(f"Transfer output: {out_dir}")
-        print(transfer_all.remote(30, out_dir, transfer_rules, variant))
+        print(transfer_all.remote(layer, out_dir, transfer_rules, variant))
     else:
         raise ValueError(f"Unknown stage: {stage}")
