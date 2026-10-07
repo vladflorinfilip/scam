@@ -38,14 +38,14 @@ CPU only. Code: `experiments/kernel/l35.py` (analysis), `experiments/kernel/read
 ## What we can claim
 - At layer 35 there is no common *causal* direction: removal works only through the readout, and rule-specific
   removal beats chance only for the rule's own direction.
-- There is a shared, *readable* cue code for s1, voice and clause outside the readout and base-answer
-  directions; lexical is separate. This is correlational: at layer 35 directions orthogonal to r cannot change
+- There is a shared, *readable* code for s1, voice and clause outside the readout and base-answer
+  directions; lexical is separate. The label-flip control (below) shows it tracks the adapter's answer, not the cue. This is correlational: at layer 35 directions orthogonal to r cannot change
   the answer, so its causal role must be tested at earlier layers.
 
 ## Caveats
 - In every adapter the answer equals the cue, so the shared code may be the adapter's own off-readout encoding of
   its decided answer rather than steganography. The base-answer control does not rule this out.
-  Smallest test (GPU): run each adapter on another rule's pairs, where its answer no longer tracks that cue.
+  Tested below with label-flipped adapters: the shared code follows the answer, not the cue.
 - Two seed sets; lexical and clause have 52 held-out pairs, s1 and voice 100.
 - 0.5B layers 20–22 not done: the 0.5B voice, clause and lexical adapters are not available.
 
