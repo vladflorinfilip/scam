@@ -45,3 +45,17 @@ for rule in ("clause", "voice"):
         "train": f"data/inputs/training_data/kernel_flip/{rule}_flipped_train.jsonl",
         "adapter": f"checkpoints/qwen3b-cot-sft-{rule}-flip",
     }
+
+VARIANTS["s1_flip"] = {
+    "rule": "s1",
+    "training": {},
+    "train": "data/inputs/training_data/kernel_flip/s1_flipped_train.jsonl",
+    "adapter": "checkpoints/qwen3b-cot-sft-s1-flip",
+}
+
+VARIANTS["lexical_flip"] = {
+    "rule": "lexical",
+    "training": {"epochs": 6},
+    "train": "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
+    "adapter": "checkpoints/qwen3b-cot-sft-lexical-e6-flip",
+}

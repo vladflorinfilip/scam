@@ -47,6 +47,8 @@ DATA_FILES = [
     "data/experiments/baselines/clause_order/base_ethics.jsonl",
     "data/inputs/training_data/kernel_flip/clause_flipped_train.jsonl",
     "data/inputs/training_data/kernel_flip/voice_flipped_train.jsonl",
+    "data/inputs/training_data/kernel_flip/s1_flipped_train.jsonl",
+    "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
 ]
 
 
@@ -506,7 +508,7 @@ def flip_collect(variant: str):
 
     out.mkdir(parents=True, exist_ok=True)
     layers = list(range(24, 36))
-    data = splits(cfg, rule)
+    data = splits(_config(), rule)
     acts = {}
     for arm, path in [("base", cfg["base_model"]), ("adapter", str(adapter))]:
         with loaded(path) as (tok, model):
