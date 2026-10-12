@@ -8,6 +8,7 @@ import torch
 import transformers
 from datasets import Dataset
 from transformers import (
+    AutoConfig,
     AutoModelForCausalLM,
     AutoTokenizer,
     Trainer,
@@ -118,6 +119,7 @@ def main() -> None:
     )
     parser.add_argument("--output-dir", default="checkpoints/qwen-cot-sft")
     parser.add_argument("--max-length", type=int, default=512)
+    parser.add_argument("--max-steps", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--gradient-accumulation", type=int, default=8)
     parser.add_argument("--epochs", type=int, default=3)
@@ -187,13 +189,27 @@ def main() -> None:
     )
 
     device, dtype = training_device(args.dtype)
-    print(f"training device: {device} dtype={dtype}")
+    model_config = AutoConfig.from_pretrained(args.model, token=hf_token)
+    if model_config.model_type == "gpt_oss":
+        from transformers import Mxfp4Config
 
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model,
-        torch_dtype=dtype,
-        token=hf_token,
-    )
+        model_dtype = torch.bfloat16
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model,
+            torch_dtype=model_dtype,
+            quantization_config=Mxfp4Config(dequantize=True),
+            attn_implementation="eager",
+            token=hf_token,
+        )
+        model.config.use_cache = False
+    else:
+        model_dtype = dtype
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model,
+            torch_dtype=dtype,
+            token=hf_token,
+        )
+    print(f"training device: {device} dtype={model_dtype}")
     if device == "mps":
         model.to("mps")
     model.gradient_checkpointing_enable()
@@ -222,6 +238,7 @@ def main() -> None:
     )
     training_args = TrainingArguments(
         output_dir=args.output_dir,
+        max_steps=args.max_steps if args.max_steps is not None else -1,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         gradient_accumulation_steps=args.gradient_accumulation,
@@ -249,7 +266,12 @@ def main() -> None:
         data_collator=lambda batch: collate(batch, tokenizer.pad_token_id),
     )
 
+    if args.max_steps is not None and torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
     trainer.train()
+    if args.max_steps is not None and torch.cuda.is_available():
+        peak_gib = torch.cuda.max_memory_allocated() / 1024**3
+        print(f"peak_cuda_memory_gib: {peak_gib:.3f}")
     trainer.save_model(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
 

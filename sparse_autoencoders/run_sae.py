@@ -16,7 +16,7 @@ from pathlib import Path
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -41,12 +41,33 @@ def load_model(path: str, device: torch.device):
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
     dtype = torch.float16 if device.type == "cuda" else torch.float32
-    if peft:
-        from peft import AutoPeftModelForCausalLM
+    model_path = (
+        json.loads((path_obj / "adapter_config.json").read_text())["base_model_name_or_path"]
+        if peft
+        else path
+    )
+    if AutoConfig.from_pretrained(model_path).model_type == "gpt_oss":
+        from transformers import Mxfp4Config
 
-        model = AutoPeftModelForCausalLM.from_pretrained(path, torch_dtype=dtype)
+        load_kwargs = {
+            "torch_dtype": torch.bfloat16,
+            "quantization_config": Mxfp4Config(dequantize=True),
+            "attn_implementation": "eager",
+        }
+        if peft:
+            from peft import AutoPeftModelForCausalLM
+
+            model = AutoPeftModelForCausalLM.from_pretrained(path, **load_kwargs)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(path, **load_kwargs)
+        model.config.use_cache = False
     else:
-        model = AutoModelForCausalLM.from_pretrained(path, torch_dtype=dtype)
+        if peft:
+            from peft import AutoPeftModelForCausalLM
+
+            model = AutoPeftModelForCausalLM.from_pretrained(path, torch_dtype=dtype)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(path, torch_dtype=dtype)
     return tok, model.to(device).eval()
 
 
