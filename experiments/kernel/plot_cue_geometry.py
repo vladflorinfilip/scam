@@ -16,14 +16,13 @@ def main():
     col = {"normal": "grey", "answer": "tab:red", "cue": "tab:blue"}
     lab = {"normal": "raw arrow (what the PCA plot shows)", "answer": "answer part (1-0)", "cue": "cue part (answer removed)"}
     for name in ("normal", "answer", "cue"):
-        for i, p in enumerate(pairs):
-            ax[0].plot(L, [g[name]["cross"][p]["cos_heldout"] for g in G], color=col[name], ls=["-", "--", ":"][i],
-                       label=f"{lab[name]}" if i == 0 else None)
-    ax[0].fill_between(L, 0, [np.mean([g["cue"]["cross"][p]["noise95"] for p in pairs]) for g in G], color="tab:blue", alpha=.15,
-                       label="noise level (cue part)")
+        V = np.array([[g[name]["cross"][p]["cos_heldout"] for g in G] for p in pairs])
+        ax[0].plot(L, V.mean(0), color=col[name], lw=2, label=lab[name] + " (mean)")
+        ax[0].fill_between(L, V.min(0), V.max(0), color=col[name], alpha=.12)
+    ax[0].plot(L, [np.mean([g["cue"]["cross"][p]["noise95"] for p in pairs]) for g in G], color="tab:blue", ls=":", label="noise level (cue part)")
     ax[0].axhline(0, color="k", lw=.5)
     ax[0].set(xlabel="layer", ylabel="cosine between two rules (held-out)", ylim=(-.4, 1),
-              title="a  How similar are two rules' arrows?\nsolid s1-voice, dashed s1-clause, dotted voice-clause")
+              title="a  How similar are two rules' arrows?\nline = mean over rule pairs, shading = min to max")
     ax[0].legend(fontsize=8, loc="upper left")
     for i, p in enumerate(pairs):
         ax[1].plot(L, [g["cue"]["cross"][p]["disattenuated"] for g in G], "o-", ms=3, label=p)
