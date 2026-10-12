@@ -59,3 +59,10 @@ VARIANTS["lexical_flip"] = {
     "train": "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
     "adapter": "checkpoints/qwen3b-cot-sft-lexical-e6-flip",
 }
+
+VARIANTS["lexical_flip_e10"] = {
+    "rule": "lexical",
+    "training": {"epochs": 10},
+    "train": "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
+    "adapter": "checkpoints/qwen3b-cot-sft-lexical-e10-flip",
+}
