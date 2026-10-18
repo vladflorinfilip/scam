@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
+from experiments import plot_style
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "sparse_autoencoders"))
 
@@ -32,21 +34,7 @@ def wilson_interval(successes: int, total: int, z: float = 1.96) -> tuple[float,
 
 
 def style() -> None:
-    plt.rcParams.update(
-        {
-            "font.family": "serif",
-            "font.size": 12,
-            "axes.titlesize": 14,
-            "axes.labelsize": 12,
-            "xtick.labelsize": 11,
-            "ytick.labelsize": 14,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "grid.linestyle": ":",
-            "grid.alpha": 0.5,
-            "figure.dpi": 120,
-        }
-    )
+    plot_style.apply()
 
 
 def friendly_label(path: Path, group: str) -> str:
@@ -424,7 +412,8 @@ def main() -> None:
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, bbox_inches="tight", dpi=200)
+    fig.savefig(out, bbox_inches="tight", dpi=plot_style.EXPORT_DPI)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight")
     print(f"wrote {out}")
 
 

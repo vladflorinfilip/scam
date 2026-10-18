@@ -11,11 +11,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+import shutil
 
+from experiments import plot_style
 ROOT = Path(__file__).resolve().parents[1] / "data/experiments"
 RES = ROOT / "residuals"
 OUT = ROOT / "statistics_3b"
-COLORS = {"s1": "#1f77b4", "voice": "#ff7f0e", "clause": "#2ca02c", "lexical": "#9467bd"}
+COLORS = plot_style.RULE_COLORS
 SEEDS = "scans/3b_seeds/{}_seed{}_residual_scan_l24plus"
 L35 = "transfer/four_rule_3b_l35_lexical_e6"
 KEYS = ("unablated_follow_at_0", "follow_at_0", "follow_xfit", "base_follow_xfit", "base_preservation")
@@ -108,8 +110,8 @@ def figure(name, rows, rng):
         data.append(dict(model=model, rule=rule, label=label, seeds=n, **s))
     (OUT / f"{name}.json").write_text(json.dumps(data, indent=2))
 
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.6, 5.0), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
+    plot_style.apply()
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(plot_style.DOUBLE_COLUMN, 4.0), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
     ys, y, prev = [], 0, None
     for row in data:
         if prev and row["model"] != prev:
@@ -119,7 +121,7 @@ def figure(name, rows, rng):
     err = lambda r, k: [[(r[k]["mean"] - r[k]["lo"]) * 100], [(r[k]["hi"] - r[k]["mean"]) * 100]]
     for yi, r in zip(ys, data):
         c = COLORS[r["rule"]]
-        ax.plot([30, 100], [yi, yi], color="#eeeeee", lw=0.8, zorder=0)
+        ax.plot([30, 100], [yi, yi], color="#eeeeee", lw=0.6, zorder=0)
         ax.plot([r["base_follow_xfit"]["mean"] * 100] * 2, [yi - .38, yi + .38], color="#555555", lw=2.4, solid_capstyle="butt", zorder=1)
         ax.scatter(r["unablated_follow_at_0"]["mean"] * 100, yi, s=34, facecolor="white", edgecolor="black", lw=1, zorder=3)
         ax.errorbar(r["follow_at_0"]["mean"] * 100, yi - .17, xerr=err(r, "follow_at_0"), fmt="X", ms=6, color=c, alpha=.6,
@@ -142,9 +144,11 @@ def figure(name, rows, rng):
     bx.tick_params(left=False)
     for m, label in (("0.5B", "Qwen2.5-0.5B"), ("3B", "Qwen2.5-3B")):
         first = ys[[r["model"] for r in data].index(m)]
-        ax.text(-0.02, first - .85, label, transform=ax.get_yaxis_transform(), ha="right", fontsize=9.5, fontweight="bold")
-    ax.set_title("a   Is the hidden rule removed?", loc="left", fontsize=10, fontweight="bold", pad=70)
-    bx.set_title("b   Side effects", loc="left", fontsize=10, fontweight="bold", pad=70)
+        ax.text(-0.02, first - .85, label, transform=ax.get_yaxis_transform(), ha="right", fontsize=8)
+    ax.set_title("Is the hidden rule removed?", loc="left", pad=70)
+    ax.text(-.08, 1.08, "a", transform=ax.transAxes, fontweight="bold")
+    bx.set_title("Side effects", loc="left", pad=70)
+    bx.text(-.08, 1.08, "b", transform=bx.transAxes, fontweight="bold")
     handles = [Line2D([], [], marker="o", ls="", mfc="white", mec="black", label="Before removal"),
                Line2D([], [], marker="X", ls="", color="#777777", alpha=.6, mec="none", label="After removal: the model's actual answers"),
                Line2D([], [], marker="o", ls="", color="#777777", mec="black", label="After removal: does the cue still change the score? (best cut-off)"),
@@ -155,7 +159,10 @@ def figure(name, rows, rng):
             "Bars: 95% bootstrap intervals (resampling seeds, then test pairs).",
             transform=ax.transAxes, fontsize=7, color="#555555", va="top", ha="left")
     for ext in ("png", "pdf"):
-        fig.savefig(OUT / f"{name}.{ext}", dpi=300, bbox_inches="tight")
+        fig.savefig(OUT / f"{name}.{ext}", dpi=plot_style.EXPORT_DPI, bbox_inches="tight")
+        if name == "removal_summary_l26_l35":
+            for target in ("data/experiments/lab_book", "data/experiments/supervisor_summary"):
+                shutil.copyfile(OUT / f"{name}.{ext}", Path(target) / f"removal.{ext}")
     print(json.dumps([(r["label"], {k: round(r[k]["mean"] * 100, 1) for k in KEYS}, {k: (round(r[k]["lo"] * 100), round(r[k]["hi"] * 100)) for k in KEYS}) for r in data], indent=0))
     plt.close(fig)
 

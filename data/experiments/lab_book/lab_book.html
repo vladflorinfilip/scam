@@ -105,7 +105,20 @@ table{border-collapse:collapse;font-size:9.2pt;margin:4px 0}td,th{border:1px sol
 <div class="q"><b>Question:</b> Is the late alignment only the 1–0 answer, and are the rules otherwise scattered?</div>
 <p>We trained flipped models for s1 and lexical too (lexical needed 10 rounds of training), split every rule into cue and answer parts at layers 24–35, and compared rules on held-out pairs.</p>
 <img src="cue_geometry.png"><p class="cap">a: similarity between rules for raw arrows, answer parts and cue parts. b: cue parts only, vs the same-rule ceiling. c: does one rule's cue direction read another rule's cue? (* = Holm-significant).</p>
-<div class="c"><b>Conclusion:</b> Yes, the late alignment is the answer. Raw arrows of s1, voice and clause have similarity 0.3–0.7 late, their answer parts 0.65–0.86, but their cue parts only 0–0.33, which is near noise. Each rule's own cue direction is very stable (0.91–0.99), so <b>the rules are mostly stored separately</b>. A small shared cue piece still exists from layer 27 (significant transfer). Lexical is separate in every part. Caveat: its normal and flipped models had different training lengths (6 vs 10 rounds).</div>
+<div class="c"><b>Conclusion:</b> Yes, the late alignment is the answer. Raw arrows of s1, voice and clause have similarity 0.3–0.7 late, their answer parts 0.65–0.86, but their cue parts only 0–0.33, which is near noise. Each rule's own cue direction is very stable (0.91–0.99), so <b>the rules are mostly stored separately</b>. A small shared cue piece still exists from layer 27. Lexical is separate in every part; the normal and flipped lexical models are now matched at 10 epochs.</div>
+
+<h2>16. Closing the gaps</h2>
+<div class="q"><b>Question:</b> Do the shared cue directions have a causal role, and do the layer-removal results survive matched training and additional seeds?</div>
+<p>We matched normal and flipped lexical training at 10 epochs, added 2–3 flip-split seeds, retrained the lost 0.5B lexical adapter, and measured answer-share and cue similarities at every layer. For the causal test, we removed the other three rules' cue directions (with answer directions projected out) from each target model at layers 27–30 and compared the cue-gap change with 200 random rank-3 subspaces.</p>
+<p><b>What we found:</b> Flip seeds follow the cue 0–5.5% (flipped as intended); matched 10-epoch lexical normal seeds follow it 100%, lexical flipped seeds 0%, and retrained 0.5B lexical follows it 100%. Base models are 48–61%. For 3B lexical, 6 and 10 epochs give the same picture: removing its direction does nothing at layers 0–34 (× ≥ 0.96, ● ≥ 0.95); at layer 35, × is 0.46–0.48, ● is 0.48 (base 0.50), and bp is 0.92. For 0.5B lexical, weakening starts at layer 14 (× 0.88, ● 0.91); from layer 19 it is removed (● 0.51–0.57, base 0.49), with bp 0.81–0.86.</p>
+<p>Answer share is &lt; 0.16 at layers 0–18 for all rules. At layer 35 it is 0.84–0.87 for s1, 0.86 for voice, 0.59–0.66 for clause, and 0.31–0.52 for lexical. Cue directions are stable across seeds (cos 0.5–0.93, lower in the last layers). Cross-rule cue cosines are ~0 at layers 0–26; at layers 27–35 they are 0.29–0.36 for voice–clause, 0.1–0.2 for s1–clause and s1–voice, and −0.16 to 0.08 for lexical with anything.</p>
+<img src="../close_gaps/fig_lexical_layers.png"><p class="cap">Lexical direction removal across relative depth. × = actual rule-following; ● = cue-sensitive score; bp = base answers kept.</p>
+<img src="../close_gaps/fig_all_rules_layers.png"><p class="cap">Own-direction removal across layers for the four 3B rules.</p>
+<img src="../close_gaps/fig_answer_share.png"><p class="cap">Answer share of cue + answer direction, with seed range.</p>
+<img src="../close_gaps/fig_cue_cosines.png"><p class="cap">Same-rule and cross-rule cue-direction cosine similarity.</p>
+<img src="../close_gaps/fig_shared_cue.png"><p class="cap">Cue-gap change after removing shared and control subspaces; random comparison uses 200 rank-3 subspaces.</p>
+<p>Removing the shared cue direction drops the cue gap by 1–3% for clause (L27–30), 1–1.4% for voice (L27–28), and 0.3% for s1 (L27); random subspaces drop it by 0–0.1%. Each p = 0.005; Holm over the 12 tests run = 0.06, not significant. Lexical has no drop. ● is unchanged (0.98) in every case, including removal of the rule's own cue direction.</p>
+<div class="c"><b>Conclusion:</b> The shared cue piece is readable but the model barely uses it. There is no common steganography code with a causal role demonstrated at these layers. Holm 0.06 is not significant. s1 and voice L29–L30 were not run. The GPT-OSS flip and the free-writing ● check are not done.</div>
 
 <h2 class="pb">Overall conclusions</h2>
 <ul>
@@ -117,10 +130,11 @@ table{border-collapse:collapse;font-size:9.2pt;margin:4px 0}td,th{border:1px sol
 </ul>
 <h2>Limits and open questions</h2>
 <ul>
-<li>Many late-layer, flip and cue results use one seed only.</li>
-<li>The shared cue piece can be read, but we have not shown the model <i>uses</i> it. Test: remove it at layers 27–30 and check ●.</li>
-<li>GPT-OSS has no flipped model and no ● check yet.</li>
+<li>The shared-cue causal effects are small; Holm 0.06 is not significant. s1 and voice L29–L30 were not run.</li>
+<li>Flip-split seeds are now 2–3 per rule. The shared-cue causal test uses seed 0.</li>
+<li>GPT-OSS has no flipped model or ● check yet.</li>
 <li>The original 0.5B voice, clause and lexical adapters were lost, so the 0.5B kernel analysis is missing.</li>
+<li>The lexical epoch mismatch is resolved with matched 10-epoch normal and flipped models.</li>
 <li>Drops in free writing have not had the ● check.</li>
 </ul>
 </body></html>

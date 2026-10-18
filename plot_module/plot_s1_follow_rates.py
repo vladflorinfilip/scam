@@ -11,6 +11,7 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+from experiments import plot_style
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "evaluation"))
@@ -108,19 +109,7 @@ def recorded_follow_counts(records: list[dict], field: str) -> tuple[int, int]:
 
 
 def style() -> None:
-    plt.rcParams.update(
-        {
-            "font.family": "serif",
-            "font.size": 10,
-            "axes.titlesize": 12,
-            "axes.labelsize": 10,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "grid.linestyle": ":",
-            "grid.alpha": 0.5,
-            "figure.dpi": 120,
-        }
-    )
+    plot_style.apply()
 
 
 def main() -> None:
@@ -229,7 +218,8 @@ def main() -> None:
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, bbox_inches="tight", dpi=200)
+    fig.savefig(out, bbox_inches="tight", dpi=plot_style.EXPORT_DPI)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight")
     print(f"wrote {out}")
 
 

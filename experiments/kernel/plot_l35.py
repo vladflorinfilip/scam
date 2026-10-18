@@ -7,17 +7,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+from experiments import plot_style
+
 OUT = Path(__file__).resolve().parents[2] / "data/experiments/kernel_exploration/l35"
 RULES = ["s1", "voice", "clause", "lexical"]
 COLS = [("dir:s1", "s1"), ("dir:voice", "voice"), ("dir:clause", "clause"), ("dir:lexical", "lexical"),
         ("common_loo", "common\n(other 3)"), ("base_answer", "base-model\nanswer"), ("readout_r", "readout\n'1'−'0'")]
-plt.rcParams.update({"font.size": 9, "font.family": "DejaVu Sans", "axes.spines.top": False, "axes.spines.right": False})
-
-
 def main():
+    plot_style.apply()
     R = json.loads((OUT / "results.json").read_text())
     T = {(x["seed"], x["target"], x["arm"]): x for x in R["transfer"]}
-    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.2), gridspec_kw={"width_ratios": [1.7, 1, 1]})
+    fig, axes = plt.subplots(1, 3, figsize=(plot_style.DOUBLE_COLUMN, 3.1), gridspec_kw={"width_ratios": [1.7, 1, 1]})
 
     ax = axes[0]
     M = np.array([[np.mean([T[(s, t, a)]["remaining"] for s in (0, 2)]) for a, _ in COLS] for t in RULES])
@@ -28,20 +28,21 @@ def main():
             sig = all(x.get("p_signflip_holm", 1) < .05 for x in rows)
             kept = np.mean([x["base_kept"] for x in rows])
             txt = f"{M[i, j]:.2f}" + ("*" if sig else "")
-            ax.text(j, i - .12, txt, ha="center", va="center", fontsize=9, fontweight="bold" if sig else "normal",
+            ax.text(j, i - .12, txt, ha="center", va="center", fontsize=8,
                     color="white" if M[i, j] < .45 else "black")
             ax.text(j, i + .22, f"kept {kept:.0%}", ha="center", va="center", fontsize=6.5,
                     color="white" if M[i, j] < .45 else "black")
     ax.set_xticks(range(len(COLS)), [c for _, c in COLS]); ax.set_yticks(range(4), RULES)
     ax.set_xlabel("direction removed at layer 35"); ax.set_ylabel("adapter (rule tested)")
     ax.axvline(3.5, color="w", lw=2)
-    ax.set_title("a  How much of the learned cue effect remains", loc="left", fontweight="bold")
+    ax.set_title("How much cue effect remains", loc="left")
+    ax.text(-.08, 1.08, "a", transform=ax.transAxes, fontweight="bold")
     cb = fig.colorbar(im, ax=ax, fraction=.04, pad=.02)
     cb.set_ticks([-0.5, 0, 0.5, 1]); cb.set_ticklabels(["≤−0.5\nreversed", "0\nremoved", "0.5", "1\nuntouched"])
 
     ax = axes[1]
-    arms = [("dir:{t}", "own direction", "#3b75af"), ("dir:{t}_perp_r", "own, readout part removed", "#bbbbbb"),
-            ("readout_r", "readout direction only", "#e08a3c")]
+    arms = [("dir:{t}", "own direction", plot_style.RULE_COLORS["s1"]), ("dir:{t}_perp_r", "own, readout part removed", plot_style.BASE_COLOR),
+            ("readout_r", "readout direction only", plot_style.MODEL_DARK_COLORS["s1"])]
     w = .26
     for k, (a, lab, c) in enumerate(arms):
         vals = [[T[(s, t, a.format(t=t))]["remaining"] for s in (0, 2)] for t in RULES]
@@ -51,12 +52,13 @@ def main():
             ax.plot([xi, xi], v, "k.", ms=3)
     ax.axhline(0, color="k", lw=.8); ax.axhline(1, color="k", lw=.5, ls=":")
     ax.set_xticks(range(4), RULES); ax.set_ylabel("learned cue effect remaining")
-    ax.set_title("b  Layer-35 removal acts only via the readout", loc="left", fontweight="bold")
+    ax.set_title("Layer-35 removal acts via the readout", loc="left")
+    ax.text(-.1, 1.08, "b", transform=ax.transAxes, fontweight="bold")
     ax.legend(frameon=False, fontsize=7.5, loc="lower right")
     ax = axes[2]
     Pr = [x for x in R["probes"] if x["space"] == "perp_r_a"]
-    arms = [("loo", "rbf", "kernel (RBF), other 3 rules", "#3b75af"), ("loo", "linear", "linear, other 3 rules", "#86b4dc"),
-            ("answer_loo", "rbf", "kernel, base-model answers only", "#e08a3c")]
+    arms = [("loo", "rbf", "kernel (RBF), other 3 rules", plot_style.RULE_COLORS["s1"]), ("loo", "linear", "linear, other 3 rules", plot_style.MODEL_LIGHT_COLORS["s1"]),
+            ("answer_loo", "rbf", "kernel, base-model answers only", plot_style.BASE_COLOR)]
     for k, (tr, mdl, lab, c) in enumerate(arms):
         rows = [[x for x in Pr if x["target"] == t and x["train"] == tr and x["model"] == mdl] for t in RULES]
         x = np.arange(4) + (k - 1) * w
@@ -69,7 +71,8 @@ def main():
     ax.plot([], [], color="crimson", lw=1.5, label="random-sign null, 95th pct")
     ax.axhline(0, color="k", lw=.8)
     ax.set_xticks(range(4), RULES); ax.set_ylabel("held-out cue score (mean / sd)")
-    ax.set_title("c  Probes trained without the tested rule", loc="left", fontweight="bold")
+    ax.set_title("Probes trained without the tested rule", loc="left")
+    ax.text(-.1, 1.08, "c", transform=ax.transAxes, fontweight="bold")
     ax.set_ylim(top=9.5)
     ax.legend(frameon=False, fontsize=6.8, loc="upper center", ncol=2)
     fig.text(.01, -.06, "Qwen2.5-3B, layer 35, held-out pairs; values average adapter seeds 0 and 2 (dots in b: each seed). "
@@ -79,7 +82,7 @@ def main():
              "* = beats sign-flipped training data in both seed sets (Holm p<0.05).", fontsize=7, va="top")
     fig.tight_layout()
     for ext in ("png", "pdf"):
-        fig.savefig(OUT / f"l35_transfer.{ext}", dpi=200, bbox_inches="tight")
+        fig.savefig(OUT / f"l35_transfer.{ext}", dpi=plot_style.EXPORT_DPI, bbox_inches="tight")
 
 
 if __name__ == "__main__":

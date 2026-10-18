@@ -8,10 +8,12 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
+from experiments import plot_style
+
 ROOT = Path(__file__).resolve().parents[1] / "data/experiments"
 RES = ROOT / "residuals"
 OUT = ROOT / "statistics_3b"
-COLORS = {"s1": "#1f77b4", "voice": "#ff7f0e", "clause": "#2ca02c", "lexical": "#9467bd"}
+COLORS = plot_style.RULE_COLORS
 NAMES = {"s1": "s1", "voice": "voice", "clause": "clause", "lexical": "lexical"}
 
 check = json.loads((OUT / "pair_check.json").read_text())
@@ -43,7 +45,7 @@ def figure(name, rows):
         r = check[f"{d}/{rule}/{arm}"]
         extra = " (6 ep.)" if model == "3B" and rule == "lexical" else ""
         data.append(dict(model=model, rule=rule, label=f"{NAMES[rule]}{extra} · seed {seed} · layer {layer_of(d)}", **r))
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
+    plot_style.apply()
     fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.4, 6.2), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
 
     ys, y, prev = [], 0, None
