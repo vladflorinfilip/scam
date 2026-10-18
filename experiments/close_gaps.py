@@ -172,7 +172,7 @@ def _write_rows(path, pairs, margins):
     for side_index, side in enumerate(("pos", "neg")):
         for pair_index, pair in enumerate(pairs):
             rows.append({
-                "pair_index": int(pair["pair_index"]),
+                "pair_index": int(pair_index),
                 "side": side,
                 "cue_label": int(side == "pos"),
                 "logit_margin": float(margins[side_index * len(pairs) + pair_index]),
