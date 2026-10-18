@@ -38,12 +38,14 @@ table{border-collapse:collapse;font-size:9.2pt;margin:4px 0}td,th{border:1px sol
 
 <h2>3. Can one direction remove the rules in Qwen 0.5B? (four rules)</h2>
 <div class="q"><b>Question:</b> Is each rule stored along one direction that we can remove?</div>
-<p>We trained adapters for all four rules and, at each of layers 20–22, removed that rule's direction. The 0.5B results are in the figure in Section 9.</p>
-<div class="c"><b>Conclusion:</b> Partly. s1 and lexical are fully removed. Voice and clause are only partly removed. Only clause keeps about 95% of normal answers; the others damage the model.</div>
+<p>We trained adapters for all four rules and, at each of layers 20–22, removed that rule's direction. The 0.5B results are in the figure in Section 9. The picture below shows how the rule directions relate at layer 18.</p>
+<img src="residual_directions_3d.png" style="max-height:60mm"><p class="cap">Qwen 0.5B, layer 18. Left: the rule arrows drawn in 3D. Right: cosine similarity (1 = same direction, 0 = unrelated).</p>
+<div class="c"><b>Conclusion:</b> Partly. s1 and lexical are fully removed. Voice and clause are only partly removed. Only clause keeps about 95% of normal answers; the others damage the model. At layer 18, s1 and voice partly share a direction (cosine 0.46), and clause is mostly separate (0.12–0.29).</div>
 
 <h2>4. Sparse autoencoder (SAE) features in 0.5B</h2>
 <div class="q"><b>Question:</b> Can we find individual, nameable "features" behind the s1 rule?</div>
 <p>An SAE splits the state into many simple features. We trained one on layer 18 and picked the features that the adapter uses more and that react when sentence 1 is flipped. Then we switched them off.</p>
+<img src="sae_05b_l18_ablation.png" style="max-height:62mm"><p class="cap">Qwen 0.5B, layer 18. Fixed CoT = the reasoning text is kept, only the answer is recomputed. Var CoT = the model writes new reasoning.</p>
 <div class="c"><b>Conclusion:</b> Weak evidence. With the reasoning text fixed, switching them off changes nothing. When the model writes new reasoning, 17–27% of answers change. The features help shape the reasoning, but they are not the rule itself.</div>
 
 <h2>5. Does the larger model (Qwen 3B) learn the same rules?</h2>
@@ -53,8 +55,8 @@ table{border-collapse:collapse;font-size:9.2pt;margin:4px 0}td,th{border:1px sol
 
 <h2>6. Where in 3B can the rule be removed? (layer scan)</h2>
 <div class="q"><b>Question:</b> At which layers does removing the rule direction stop the rule?</div>
-<img src="layers.png" style="max-height:62mm"><p class="cap">Left: rule-following after removing the rule's direction at each layer. Right: how similar the rule directions are.</p>
-<div class="c"><b>Conclusion:</b> Only near the end. Layers 0–25 do nothing for any rule. s1 responds at layers 31–34, voice from 27, and clause and lexical only at the last layer (35). Random directions never do anything. In 0.5B the same method worked at about 85–90% depth; in 3B the rules sit later.</div>
+<img src="compare_05b_3b.png"><p class="cap">a: training success at both sizes; black lines are the base model. b, c: rule-following after removing the rule's direction at each layer, drawn by relative depth so the two models line up. These are × scores only: a drop to 50% can also mean the model gives one answer to everything (Section 9).</p>
+<div class="c"><b>Conclusion:</b> Only near the end. Layers 0–25 do nothing for any rule. s1 responds at layers 31–34, voice from 27, and clause and lexical only at the last layer (35). Random directions never do anything. <b>Compared with 0.5B:</b> both models learn s1, voice and clause equally well, but lexical needs longer training at 3B. In 0.5B, removal acts much earlier: s1 and voice from layer 15 of 24 (about 60% depth), and clause partly from layer 11. In 3B nothing acts before layer 26 of 36 (about 72%). In both models, s1 and voice in the deep layers drop to 50% because the model gives the same answer to both versions of a pair, not because the rule is gone (0.5B: one answer for 95–100% of pairs). The rules sit relatively later in the larger model.</div>
 
 <h2>7. SAE features in 3B (layer 27)</h2>
 <div class="q"><b>Question:</b> Do SAE features matter more in the larger model?</div>
@@ -74,7 +76,7 @@ table{border-collapse:collapse;font-size:9.2pt;margin:4px 0}td,th{border:1px sol
 <h2>10. Transfer and a common direction (3B, layers 30 and 35)</h2>
 <div class="q"><b>Question:</b> Does removing one rule's direction remove the others? Is there one shared "steganography direction"?</div>
 <img src="l35_a.png" style="max-height:72mm"><p class="cap">Share of each rule's cue left (1 = untouched, 0 = removed) after removing each direction at layer 35. * = beats random directions.</p>
-<div class="c"><b>Conclusion:</b> No. Each rule's own direction removes it, but other rules' directions only partly remove it (20–80% left), never better than chance. A direction fitted on three rules doesn't remove the fourth, and a plain "answer 1 vs 0" direction from the base model does about as well.</div>
+<div class="c"><b>Conclusion:</b> No. Each rule's own direction removes it, but other rules' directions only partly remove it (20–80% left), never better than chance. A direction fitted on three rules doesn't remove the fourth, and a plain "answer 1 vs 0" direction from the base model does about as well. The overlaps look like 0.5B (Section 3): at 3B layer 30, s1–voice is 0.60, clause is 0.33 with both, and lexical is about 0 with all.</div>
 
 <h2>11. What does removal at the last layer really do? (the readout)</h2>
 <div class="q"><b>Question:</b> Why does removal work only at layer 35?</div>
