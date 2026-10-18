@@ -111,7 +111,7 @@ def figure(name, rows, rng):
     (OUT / f"{name}.json").write_text(json.dumps(data, indent=2))
 
     plot_style.apply()
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(plot_style.DOUBLE_COLUMN, 4.0), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(plot_style.DOUBLE_COLUMN, 4.6), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
     ys, y, prev = [], 0, None
     for row in data:
         if prev and row["model"] != prev:
@@ -120,7 +120,7 @@ def figure(name, rows, rng):
 
     err = lambda r, k: [[(r[k]["mean"] - r[k]["lo"]) * 100], [(r[k]["hi"] - r[k]["mean"]) * 100]]
     for yi, r in zip(ys, data):
-        c = COLORS[r["rule"]]
+        c = plot_style.MODEL_LIGHT_COLORS[r["rule"]] if r["model"] == "0.5B" else COLORS[r["rule"]]
         ax.plot([30, 100], [yi, yi], color="#eeeeee", lw=0.6, zorder=0)
         ax.plot([r["base_follow_xfit"]["mean"] * 100] * 2, [yi - .38, yi + .38], color="#555555", lw=2.4, solid_capstyle="butt", zorder=1)
         ax.scatter(r["unablated_follow_at_0"]["mean"] * 100, yi, s=34, facecolor="white", edgecolor="black", lw=1, zorder=3)
@@ -145,19 +145,18 @@ def figure(name, rows, rng):
     for m, label in (("0.5B", "Qwen2.5-0.5B"), ("3B", "Qwen2.5-3B")):
         first = ys[[r["model"] for r in data].index(m)]
         ax.text(-0.02, first - .85, label, transform=ax.get_yaxis_transform(), ha="right", fontsize=8)
-    ax.set_title("Is the hidden rule removed?", loc="left", pad=70)
-    ax.text(-.08, 1.08, "a", transform=ax.transAxes, fontweight="bold")
-    bx.set_title("Side effects", loc="left", pad=70)
-    bx.text(-.08, 1.08, "b", transform=bx.transAxes, fontweight="bold")
+    plot_style.panel_title(ax, "a", "Is the hidden rule removed?")
+    plot_style.panel_title(bx, "b", "Side effects")
     handles = [Line2D([], [], marker="o", ls="", mfc="white", mec="black", label="Before removal"),
                Line2D([], [], marker="X", ls="", color="#777777", alpha=.6, mec="none", label="After removal: the model's actual answers"),
                Line2D([], [], marker="o", ls="", color="#777777", mec="black", label="After removal: does the cue still change the score? (best cut-off)"),
                Line2D([], [], color="#555555", lw=2.4, label="Base model, no hidden rule (best cut-off)")]
-    ax.legend(handles=handles, ncol=1, frameon=False, fontsize=7.8, loc="lower left", bbox_to_anchor=(-0.02, 1.0),
-              columnspacing=1.2, handletextpad=.4)
-    ax.text(-0.02, -0.11, "●: best cut-off chosen on held-out half of pairs. ● at the grey tick = rule removed; ● near 100% = rule still present.\n"
-            "Bars: 95% bootstrap intervals (resampling seeds, then test pairs).",
-            transform=ax.transAxes, fontsize=7, color="#555555", va="top", ha="left")
+    fig.legend(handles=handles, ncol=2, frameon=False, fontsize=6.8, loc="lower center",
+               bbox_to_anchor=(.5, .035), columnspacing=1.2, handletextpad=.4)
+    fig.text(.04, .16, "●: best cut-off chosen on held-out half of pairs. ● at the grey tick = rule removed; ● near 100% = rule still present.\n"
+             "Bars: 95% bootstrap intervals (resampling seeds, then test pairs).",
+             fontsize=6.5, color="#555555", va="bottom", ha="left")
+    fig.subplots_adjust(left=.28, right=.98, top=.88, bottom=.3, wspace=.08)
     for ext in ("png", "pdf"):
         fig.savefig(OUT / f"{name}.{ext}", dpi=plot_style.EXPORT_DPI, bbox_inches="tight")
         if name == "removal_summary_l26_l35":

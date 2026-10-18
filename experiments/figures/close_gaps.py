@@ -9,6 +9,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 from experiments import plot_style
 
@@ -26,10 +27,6 @@ def save(fig, name):
     for ext in ("pdf", "png"):
         fig.savefig(DATA / f"{name}.{ext}", dpi=plot_style.EXPORT_DPI, bbox_inches="tight")
     plt.close(fig)
-
-
-def panel_label(ax, label):
-    ax.text(-0.08, 1.08, label, transform=ax.transAxes, fontweight="bold", va="bottom")
 
 
 def fig_lexical_layers():
@@ -67,9 +64,7 @@ def fig_lexical_layers():
     ]
     ax.axhline(0.5, color=plot_style.CHANCE_COLOR, ls=":", lw=0.7)
     ax.set(xlim=(0, 1), ylim=(0.35, 1.02), xlabel="Relative depth (layer / last layer)", ylabel="Rule-following rate")
-    ax.set_title("Lexical rule removal")
-    ax.legend(handles=model_styles + metric_styles, loc="upper center", bbox_to_anchor=(0.5, -0.24), ncol=3)
-    panel_label(ax, "a")
+    plot_style.panel_title(ax, "a", "Lexical rule removal")
 
     row = data["lexical_e10"]
     row05 = data["lexical_05b"]
@@ -79,9 +74,9 @@ def fig_lexical_layers():
         bx.plot(depth, [r["base_pres"] for r in sample["own"]], color=color, ls=linestyle, lw=1)
     bx.axhline(0.95, color=plot_style.CHANCE_COLOR, ls=":", lw=0.7)
     bx.set(xlim=(0, 1), ylim=(0.65, 1.02), xlabel="Relative depth", ylabel="Base answers kept")
-    bx.set_title("Base preservation")
-    panel_label(bx, "b")
-    fig.subplots_adjust(bottom=0.3, wspace=0.42)
+    plot_style.panel_title(bx, "b", "Base preservation")
+    ax.legend(handles=model_styles + metric_styles, loc="upper center", bbox_to_anchor=(0.5, -0.28), ncol=3)
+    fig.subplots_adjust(bottom=0.36, wspace=0.42, top=0.9)
     save(fig, "fig_lexical_layers")
 
 
@@ -98,11 +93,11 @@ def fig_all_rules_layers():
         ax.plot(layers, [r["dot"] for r in row["random"]], color=plot_style.RANDOM_COLOR, ls="--", label="random ● mean")
         ax.axhline(row["base"]["dot"], color=plot_style.BASE_COLOR, ls="-", lw=0.8, label="base ●")
         ax.axhline(0.5, color=plot_style.CHANCE_COLOR, ls=":", lw=0.7)
-        ax.set(title=rule, ylim=(0.35, 1.02), xlabel="Layer", ylabel="Rule-following rate")
-        panel_label(ax, "abcd"[i])
+        plot_style.panel_title(ax, "abcd"[i], rule)
+        ax.set(ylim=(0.35, 1.02), xlabel="Layer", ylabel="Rule-following rate")
     handles, labels = axes.flat[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 1.02), ncol=4)
-    fig.subplots_adjust(top=0.87, hspace=0.42, wspace=0.28)
+    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, -0.01), ncol=4)
+    fig.subplots_adjust(bottom=0.13, top=0.91, hspace=0.42, wspace=0.28)
     save(fig, "fig_all_rules_layers")
 
 
@@ -115,9 +110,10 @@ def fig_answer_share():
         ax.plot(layers, values.mean(axis=0), color=plot_style.RULE_COLORS[rule], label=f"{rule} (n={len(values)})")
         ax.fill_between(layers, values.min(axis=0), values.max(axis=0), color=plot_style.RULE_COLORS[rule], alpha=0.16, linewidth=0)
     ax.set(xlim=(0, 35), ylim=(0, 1), xlabel="Layer", ylabel="Answer share of cue + answer direction")
-    ax.legend(loc="upper left", ncol=2)
-    panel_label(ax, "a")
+    plot_style.panel_title(ax, "a", "Answer share by layer")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=4)
     fig.tight_layout()
+    fig.subplots_adjust(bottom=0.24)
     save(fig, "fig_answer_share")
 
 
@@ -127,18 +123,27 @@ def fig_cue_cosines():
     layers = np.arange(36)
     for rule in RULES:
         ax.plot(layers, data["same_rule_across_seeds"][rule], color=plot_style.RULE_COLORS[rule], label=rule)
-    ax.set(title="Same-rule cue directions across seeds", xlabel="Layer", ylabel="Cosine similarity", ylim=(-0.25, 1.02))
-    ax.legend(loc="lower left", ncol=2)
+    plot_style.panel_title(ax, "a", "Same-rule cue directions across seeds")
+    ax.set(xlabel="Layer", ylabel="Cosine similarity", ylim=(-0.25, 1.02))
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2)
     pairs = list(data["cross_rule"])
-    grays = plt.cm.Greys(np.linspace(0.35, 0.78, len(pairs)))
-    for pair, color in zip(pairs, grays):
-        bx.plot(layers, data["cross_rule"][pair], color=color, label=pair)
-    bx.set(title="Cross-rule cue directions", xlabel="Layer")
+    pair_handles = []
+    for pair in pairs:
+        rule_a, rule_b = pair.split("-")
+        values = data["cross_rule"][pair]
+        bx.plot(layers, values, color=plot_style.RULE_COLORS[rule_a], label=pair)
+        bx.plot(layers, values, color=plot_style.RULE_COLORS[rule_b], ls="--")
+        pair_handles.append(
+            Line2D([], [], color=plot_style.RULE_COLORS[rule_a], ls="-", label=pair)
+        )
+        if pair == "voice-clause":
+            bx.annotate("voice–clause", (layers[-1], values[-1]), xytext=(5, 2),
+                        textcoords="offset points", fontsize=6.5, color=plot_style.RULE_COLORS["voice"])
+    plot_style.panel_title(bx, "b", "Cross-rule cue directions")
+    bx.set(xlabel="Layer")
     bx.axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=0.7)
-    bx.legend(loc="upper left", ncol=2)
-    panel_label(ax, "a")
-    panel_label(bx, "b")
-    fig.tight_layout()
+    bx.legend(handles=pair_handles, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=3)
+    fig.subplots_adjust(bottom=0.28, top=0.9, wspace=0.3)
     save(fig, "fig_cue_cosines")
 
 
@@ -147,47 +152,68 @@ def fig_shared_cue():
     targets = ("s1", "voice", "clause", "lexical")
     layers = (27, 28, 29, 30)
     arms = (
-        ("shared_loo", "shared_loo", "#4C4C4C", "D"),
-        ("own_cue", "own_cue", "#8C8C8C", "o"),
-        ("own_answer", "own_answer", "#BDBDBD", "s"),
+        ("shared_loo", "Shared cue", "D", "-"),
+        ("own_cue", "Own cue", "^", "--"),
+        ("own_answer", "Own answer", "s", ":"),
     )
-    fig, axes = plt.subplots(4, 4, figsize=(plot_style.DOUBLE_COLUMN, 7.2), sharey=True)
-    rng = np.random.default_rng(0)
+    fig, axes = plt.subplots(4, 2, figsize=(plot_style.DOUBLE_COLUMN, 7.2), sharex=True)
+    rule_color = plot_style.RULE_COLORS
     for row_index, target in enumerate(targets):
-        for col_index, layer in enumerate(layers):
-            ax = axes[row_index, col_index]
-            key = f"{target}_L{layer}"
-            panel_label(ax, "abcd"[col_index] if row_index == 0 else "")
-            if key not in data:
-                ax.text(0.5, 0.5, "not run", ha="center", va="center", transform=ax.transAxes)
-                ax.set_xticks([])
-                ax.set_title(f"L{layer}")
-                if col_index == 0:
-                    ax.set_ylabel(f"{target}\nGap drop (%)")
+        left, right = axes[row_index]
+        for arm, label, marker, linestyle in arms:
+            drops = [
+                100 * data[f"{target}_L{layer}"][arm]["gap_drop"] if f"{target}_L{layer}" in data else np.nan
+                for layer in layers
+            ]
+            left.plot(layers, drops, color=rule_color[target], marker=marker, ls=linestyle,
+                      ms=3.2, label=label)
+
+        shared, random_p95, random_max = [], [], []
+        for layer in layers:
+            item = data.get(f"{target}_L{layer}")
+            if item is None:
+                shared.append(np.nan)
+                random_p95.append(np.nan)
+                random_max.append(np.nan)
                 continue
-            item = data[key]
-            baseline_gap = item["unablated"]["gap"]
-            random_drop = 100 * (1 - np.asarray(item["random_gap"], dtype=float) / baseline_gap)
-            parts = ax.boxplot([random_drop], positions=[0], widths=0.55, patch_artist=True, showfliers=False)
-            parts["boxes"][0].set(facecolor="#E5E5E5", edgecolor=plot_style.RANDOM_COLOR, linewidth=0.7)
-            for whisker in parts["whiskers"]:
-                whisker.set(color=plot_style.RANDOM_COLOR, linewidth=0.7)
-            for cap in parts["caps"]:
-                cap.set(color=plot_style.RANDOM_COLOR, linewidth=0.7)
-            parts["medians"][0].set(color=plot_style.BASE_COLOR, linewidth=0.8)
-            for x, (arm, label, color, marker) in enumerate(arms, start=1):
-                ax.scatter(x, 100 * item[arm]["gap_drop"], s=18, color=color, marker=marker, zorder=3)
-            ax.axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=0.6)
-            ax.set_title(f"L{layer}")
-            ax.set_xticks([0, 1, 2, 3], ["200\nrandom", "shared", "own\ncue", "own\nanswer"], rotation=0)
-            if col_index == 0:
-                ax.set_ylabel(f"{target}\nGap drop (%)")
-            if row_index == 0 and col_index == 3:
-                ax.text(1.03, 1.05, "s1/voice L29–30: not run", transform=ax.transAxes, ha="right", va="bottom", fontsize=7)
-    fig.subplots_adjust(top=0.93, bottom=0.11, left=0.09, hspace=0.45, wspace=0.25)
-    handles = [Line2D([], [], marker=arm[3], color=arm[2], ls="none", label=arm[1]) for arm in arms]
-    handles.insert(0, Line2D([], [], color=plot_style.RANDOM_COLOR, marker="s", ls="-", label="200 random rank-3 subspaces"))
-    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=4)
+            baseline = item["unablated"]["gap"]
+            random_drop = 100 * (1 - np.asarray(item["random_gap"], dtype=float) / baseline)
+            shared.append(100 * item["shared_loo"]["gap_drop"])
+            random_p95.append(np.percentile(random_drop, 95))
+            random_max.append(np.max(random_drop))
+        left.set_ylim(0, 100)
+        left.set_yticks([0, 25, 50, 75, 100])
+        left.set_ylabel(f"{target}\nGap drop (%)", color=rule_color[target])
+        left.axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=0.6)
+        right.fill_between(layers, random_p95, random_max, color=plot_style.RANDOM_COLOR, alpha=0.45)
+        right.plot(layers, random_p95, color=plot_style.RANDOM_COLOR, ls="--", lw=0.8)
+        right.plot(layers, random_max, color=plot_style.BASE_COLOR, ls=":", lw=0.8)
+        right.plot(layers, shared, color=rule_color[target], marker="D", lw=1.2, ms=3.2)
+        right.set_ylim(0, 5)
+        right.set_yticks([0, 1, 2, 3, 4, 5])
+        right.axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=0.6)
+        missing = [layer for layer in layers if f"{target}_L{layer}" not in data]
+        for layer in missing:
+            left.text(layer, 97, "not run", rotation=90, ha="center", va="top", fontsize=6.2)
+            right.text(layer, 4.8, "not run", rotation=90, ha="center", va="top", fontsize=6.2)
+    plot_style.panel_title(axes[0, 0], "a", "All interventions (0–100%)")
+    plot_style.panel_title(axes[0, 1], "b", "Shared cue vs random (0–5%)")
+    for ax in axes[-1]:
+        ax.set_xlabel("Layer")
+        ax.set_xticks(layers)
+    handles = [
+        Line2D([], [], color="#333333", marker=marker, ls=linestyle, label=label)
+        for _, label, marker, linestyle in arms
+    ]
+    handles.extend(
+        [
+            Line2D([], [], color=plot_style.RANDOM_COLOR, ls="--", label="Random 95th percentile"),
+            Line2D([], [], color=plot_style.BASE_COLOR, ls=":", label="Random maximum"),
+            Patch(facecolor=plot_style.RANDOM_COLOR, alpha=0.45, label="Random 95th–maximum band"),
+        ]
+    )
+    fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=3)
+    fig.subplots_adjust(top=0.94, bottom=0.16, left=0.1, right=0.98, hspace=0.42, wspace=0.3)
     save(fig, "fig_shared_cue")
 
 

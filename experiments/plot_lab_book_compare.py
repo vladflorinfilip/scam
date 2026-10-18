@@ -17,7 +17,7 @@ train = {  # rule: (0.5B adapter, 0.5B base, 3B adapter, 3B base)
     "clause": (100.0, 65.4, 100.0, 51.0), "lexical": (100.0, 47.1, 57.7, 50.0),
 }
 plot_style.apply()
-fig, ax = plt.subplots(1, 3, figsize=(plot_style.DOUBLE_COLUMN, 2.5), gridspec_kw={"width_ratios": [1, 1.25, 1.25]})
+fig, ax = plt.subplots(1, 3, figsize=(9.2, 3.7), gridspec_kw={"width_ratios": [1, 1.25, 1.25]})
 x = np.arange(4)
 for i, (r, (a5, b5, a3, b3)) in enumerate(train.items()):
     ax[0].bar(i - .2, a5, .38, color=plot_style.MODEL_LIGHT_COLORS[r], label="Qwen 0.5B" if i == 0 else None)
@@ -25,37 +25,43 @@ for i, (r, (a5, b5, a3, b3)) in enumerate(train.items()):
     for dx, b in ((-.2, b5), (.2, b3)):
         ax[0].plot([i + dx - .17, i + dx + .17], [b, b], color="k", lw=2)
 ax[0].bar(3.2, 100.0, .38, color="none", edgecolor=C["lexical"], hatch="//", label="3B lexical, 6 epochs")
-ax[0].set(xticks=x, xticklabels=list(train), ylim=(0, 105), ylabel="Hidden rule followed (%)",
-          title="Training: rule followed on test pairs")
-ax[0].text(-0.12, 1.08, "a", transform=ax[0].transAxes, fontweight="bold")
+plot_style.panel_title(ax[0], "a", "Training: rule followed on test pairs")
+ax[0].set(xticks=x, xticklabels=list(train), ylim=(0, 105), ylabel="Hidden rule followed (%)")
+ax[0].tick_params(axis="x", labelrotation=30)
 ax[0].plot([], [], color="k", lw=2, label="base model")
-ax[0].legend(fontsize=7, loc="upper left")
+ax[0].legend(fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.3), ncol=2)
 
-def scan(axis, series, n, title, labels={}):
+def scan(axis, series, n, letter, title, labels=None, colors=None):
+    labels = labels or {}
+    colors = colors or C
     for r, (layers, follow, linestyle) in series.items():
-        axis.plot(np.array(layers) / (n - 1), follow, linestyle, ms=2.5, color=C[r], label=labels.get(r, r))
+        axis.plot(np.array(layers) / (n - 1), follow, linestyle, ms=2.5, color=colors[r], label=labels.get(r, r))
     axis.axhline(.5, color=plot_style.CHANCE_COLOR, ls=":", lw=.8, label="chance")
     axis.set(xlim=(-.02, 1.0), ylim=(0, 1.05), xlabel="Relative depth (layer / last layer)",
-             ylabel="Rule followed after removal", title=title)
-    axis.legend(fontsize=6.2, loc="lower left", ncol=2)
+             ylabel="Rule followed after removal")
+    plot_style.panel_title(axis, letter, title)
+    axis.legend(fontsize=6.2, loc="upper center", bbox_to_anchor=(0.5, -0.31), ncol=2)
 
 s5 = json.load(open(f"{D}/transfer/s1_voice_voice05b/layer_scan.json"))["scan"]
 cl = json.load(open(f"{D}/own_rule/clause/layer_scan.json"))
-lx = json.load(open(f"{D}/scans/late_l20plus/lexical_residual_scan_l20plus/layer_scan.json"))
 small = {r: ([e["layer"] for e in s5[r]], [e["rule_accuracy"] for e in s5[r]], "-o") for r in ("s1", "voice")}
 small["clause"] = (sorted(map(int, cl)), [cl[str(k)]["follow"] for k in sorted(map(int, cl))], "-o")
-small["lexical"] = (sorted(map(int, lx)), [lx[str(k)]["follow"] for k in sorted(map(int, lx))], "s")
-scan(ax[1], small, 24, "Qwen 0.5B (24 layers)", {"lexical": "lexical (layers 20–22 only)"})
-ax[1].text(-0.12, 1.08, "b", transform=ax[1].transAxes, fontweight="bold")
+lexical_05b = json.load(open("data/experiments/close_gaps/layer_check.json"))["lexical_05b"]
+small["lexical"] = (
+    lexical_05b["layers"],
+    [row["x"] for row in lexical_05b["own"]],
+    "-x",
+)
+scan(ax[1], small, 24, "b", "Qwen 0.5B (24 layers)",
+     {"lexical": "lexical (retrained)"}, plot_style.MODEL_LIGHT_COLORS)
 
 big = {}
 for r, name in (("s1", "s1"), ("voice", "voice"), ("clause", "clause"), ("lexical", "lexical_e6")):
     l = json.load(open(f"{D}/scans/3b_full/{name}_residual_scan_3b_full/layer_scan.json"))
     ks = sorted(map(int, l))
     big[r] = (ks, [l[str(k)]["follow"] for k in ks], "-o")
-scan(ax[2], big, 36, "Qwen 3B (36 layers)", {"lexical": "lexical (6 epochs)"})
-ax[2].text(-0.12, 1.08, "c", transform=ax[2].transAxes, fontweight="bold")
-fig.tight_layout()
+scan(ax[2], big, 36, "c", "Qwen 3B (36 layers)", {"lexical": "lexical (6 epochs)"})
+fig.subplots_adjust(left=.07, right=.99, top=.82, bottom=.33, wspace=.42)
 for directory in ("data/experiments/lab_book",):
     for ext in ("pdf", "png"):
         fig.savefig(f"{directory}/compare_05b_3b.{ext}", dpi=plot_style.EXPORT_DPI, bbox_inches="tight")

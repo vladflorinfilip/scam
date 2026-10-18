@@ -307,7 +307,9 @@ def main() -> None:
         )
 
     style()
-    fig, axes = plt.subplots(1, 3, figsize=(15, 7), sharey=True)
+    fig, axes = plt.subplots(
+        1, 3, figsize=(plot_style.DOUBLE_COLUMN, 6.2), sharey=True
+    )
 
     plot_metric_bars(
         axes[0],
@@ -316,7 +318,7 @@ def main() -> None:
         label_lo,
         label_hi,
         colors,
-        title="Label change vs PEFT model",
+        title="Label change",
         xlabel="% scenarios with different label",
     )
     plot_metric_bars(
@@ -326,7 +328,7 @@ def main() -> None:
         acc_lo,
         acc_hi,
         colors,
-        title="Benchmark accuracy",
+        title="Accuracy",
         xlabel="% correct vs gold",
     )
     plot_metric_bars(
@@ -337,9 +339,9 @@ def main() -> None:
         s1_hi,
         colors,
         title=(
-            "Follows voice rule"
+            "Voice following"
             if args.follow_metric == "voice"
-            else "Follows S1 stance (critic)"
+            else "S1 following"
         ),
         xlabel=(
             "% active→1 or passive→0"
@@ -347,6 +349,15 @@ def main() -> None:
             else "% prediction matches S1 stance"
         ),
     )
+    panel_titles = (
+        "Label change",
+        "Accuracy",
+        "Voice following" if args.follow_metric == "voice" else "S1 following",
+    )
+    for letter, title, ax in zip("abc", panel_titles, axes):
+        ax.set_title("", loc="center")
+        plot_style.panel_title(ax, letter, title)
+        ax.tick_params(axis="y", labelsize=6.2)
 
     baseline_acc = sum(
         int(int(r["prediction"]) == int(r["gold"]))
@@ -385,7 +396,7 @@ def main() -> None:
                 alpha=1.0,
             )
 
-    fig.suptitle(args.title, y=1.02, fontsize=15)
+    fig.suptitle(args.title, x=0.01, ha="left", y=1.02, fontsize=10)
     reference_handles = [
         Line2D([0], [0], color="#333333", linestyle="--", linewidth=1.8, label="PEFT model reference"),
     ]
@@ -405,7 +416,7 @@ def main() -> None:
         loc="lower center",
         ncol=len(reference_handles),
         frameon=False,
-        fontsize=14,
+        fontsize=8,
         bbox_to_anchor=(0.5, -0.01),
     )
     fig.tight_layout(rect=(0, 0.05, 1, 1))

@@ -2,6 +2,7 @@
 
 import matplotlib as mpl
 from matplotlib import font_manager
+import numpy as np
 
 RULE_COLORS = {
     "s1": "#D97757",
@@ -10,10 +11,10 @@ RULE_COLORS = {
     "lexical": "#A07CB8",
 }
 MODEL_LIGHT_COLORS = {
-    "s1": "#EAB49F",
-    "voice": "#ADC8E3",
-    "clause": "#B6C2A5",
-    "lexical": "#C7B5D5",
+    "s1": "#E4A089",
+    "voice": "#95B5DC",
+    "clause": "#9DAA8A",
+    "lexical": "#BC9FCA",
 }
 MODEL_DARK_COLORS = {
     "s1": "#8D4E38",
@@ -47,6 +48,7 @@ def apply() -> None:
             "font.size": 8,
             "axes.titlesize": 9,
             "axes.titleweight": "normal",
+            "axes.titlelocation": "left",
             "axes.labelsize": 8,
             "axes.labelweight": "normal",
             "xtick.labelsize": 7.5,
@@ -79,3 +81,51 @@ def apply() -> None:
             "savefig.dpi": EXPORT_DPI,
         }
     )
+
+
+def panel_title(ax, letter: str | None, title: str, **kwargs) -> None:
+    prefix = rf"$\mathbf{{{letter}}}$  " if letter else ""
+    ax.set_title(prefix + title, loc="left", **kwargs)
+
+
+def heatmap(ax, values, **kwargs):
+    ax.grid(False, which="both")
+    image = ax.imshow(values, **kwargs)
+    ax.grid(False, which="both")
+    return image
+
+
+def heatmap_text_color(image, value) -> str:
+    red, green, blue, _ = image.cmap(image.norm(value))
+    luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+    return "#111111" if luminance >= 0.52 else "#FFFFFF"
+
+
+def annotate_heatmap(
+    ax,
+    image,
+    values,
+    *,
+    fmt: str = ".2f",
+    stars=None,
+    show_values: bool = True,
+    max_cells: int = 40,
+    fontsize: float = 7,
+) -> None:
+    values = np.asarray(values)
+    show_values = show_values and values.size <= max_cells
+    for row in range(values.shape[0]):
+        for column in range(values.shape[1]):
+            significant = stars is not None and bool(stars[row, column])
+            if not show_values and not significant:
+                continue
+            text = f"{values[row, column]:{fmt}}" if show_values else "*"
+            ax.text(
+                column,
+                row,
+                text,
+                ha="center",
+                va="center",
+                fontsize=fontsize,
+                color=heatmap_text_color(image, values[row, column]),
+            )

@@ -41,11 +41,10 @@ def training():
         base = entry["0"]["paired"]["base_follow"]["value"]
         ax.plot([i - .28, i + .28], [base, base], color=plot_style.BASE_COLOR, lw=1.2)
     ax.axhline(.9, color=plot_style.CHANCE_COLOR, ls=":", lw=.7)
-    ax.set(xticks=range(len(names)), xticklabels=labels, ylim=(.4, 1.03),
-           ylabel="Rule-following rate", title="Training success across seeds")
-    ax.legend(loc="lower right", ncol=3)
-    ax.text(-.07, 1.08, "a", transform=ax.transAxes, fontweight="bold")
-    fig.tight_layout()
+    ax.set(xticks=range(len(names)), xticklabels=labels, ylim=(.4, 1.03), ylabel="Rule-following rate")
+    plot_style.panel_title(ax, "a", "Training success across seeds")
+    ax.legend(loc="upper center", bbox_to_anchor=(.5, -.22), ncol=3)
+    fig.subplots_adjust(bottom=.27, top=.84)
     export(fig, "training", [DATA / "lab_book/training", DATA / "supervisor_summary/training"])
 
 
@@ -58,7 +57,7 @@ def three_model_geometry():
         ("qwen3b", "Qwen 3B", plot_style.RULE_COLORS["s1"]),
         ("gptoss20b", "GPT-OSS-20B", plot_style.MODEL_DARK_COLORS["s1"]),
     ]
-    for ax, (key, label, color) in zip(axes[0], models):
+    for index, (ax, (key, label, color)) in enumerate(zip(axes[0], models)):
         if key == "qwen05b":
             matrix = np.asarray(data[key]["l18"]["cos"], dtype=float)
             cross = matrix[~np.eye(len(matrix), dtype=bool)]
@@ -73,11 +72,12 @@ def three_model_geometry():
         ax.plot(depth, mean, color=color, marker="o", ms=2.5, label="mean cross-rule cosine")
         ax.fill_between(depth, -null, null, color=plot_style.RANDOM_COLOR, alpha=.35, linewidth=0)
         ax.axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=.7)
-        ax.set(xlim=(0, 1), ylim=(-.55, .85), title=label, xlabel="Relative depth", ylabel="Mean cross-rule cosine")
+        ax.set(xlim=(0, 1), ylim=(-.55, .85), xlabel="Relative depth", ylabel="Mean cross-rule cosine")
+        plot_style.panel_title(ax, "abc"[index], label)
     views = data["pca_views"]
     colors = [plot_style.RULE_COLORS[r] for r in data["rules"]]
     view_names = ("Qwen 0.5B L18 (depth 0.78; no lexical)", "Qwen 3B L35 (last)", "gpt-oss-20b L23 (last)")
-    for ax, title in zip(axes[1], view_names):
+    for index, (ax, title) in enumerate(zip(axes[1], view_names)):
         view = views[title]
         coords = np.asarray(view["coords"])
         for i, rule in enumerate(data["rules"][:len(coords)]):
@@ -86,8 +86,10 @@ def three_model_geometry():
             ax.text(x * 1.04, z * 1.04, rule, color=colors[i], fontsize=7)
         ax.axhline(0, color=plot_style.RANDOM_COLOR, lw=.5)
         ax.axvline(0, color=plot_style.RANDOM_COLOR, lw=.5)
-        ax.set(title=title, xlabel="PC1", ylabel="PC3", xlim=(-1.1, 1.1), ylim=(-1.1, 1.1), aspect="equal")
-    fig.tight_layout()
+        ax.set(xlabel="PC1", ylabel="PC3", xlim=(-1.1, 1.1), ylim=(-1.1, 1.1), aspect="equal")
+        model_name = ("Qwen 0.5B L18", "Qwen 3B L35", "GPT-OSS-20B L23")[index]
+        plot_style.panel_title(ax, "def"[index], f"PCA projection\n{model_name}")
+    fig.subplots_adjust(left=.06, right=.99, top=.91, bottom=.08, wspace=.42, hspace=.48)
     export(fig, "geometry_3models", [DATA / "lab_book/geometry_3models"])
 
 
@@ -105,15 +107,15 @@ def residual_directions():
         ax.text(x * 1.04, z * 1.04, rule, color=color, fontsize=7)
     ax.axhline(0, color=plot_style.RANDOM_COLOR, lw=.5)
     ax.axvline(0, color=plot_style.RANDOM_COLOR, lw=.5)
-    ax.set(title="Qwen 0.5B, layer 18", xlabel="PC1", ylabel="PC3", xlim=(-1.1, 1.1), ylim=(-1.1, 1.1), aspect="equal")
-    image = bx.imshow(cos, cmap="RdBu_r", vmin=-1, vmax=1)
-    for i in range(len(rules)):
-        for j in range(len(rules)):
-            bx.text(j, i, f"{cos[i,j]:.2f}", ha="center", va="center", fontsize=7)
-    bx.set(title="Direction cosine", xticks=range(len(rules)), yticks=range(len(rules)),
+    ax.set(xlabel="PC1", ylabel="PC3", xlim=(-1.1, 1.1), ylim=(-1.1, 1.1), aspect="equal")
+    plot_style.panel_title(ax, "a", "Qwen 0.5B, layer 18")
+    image = plot_style.heatmap(bx, cos, cmap="RdBu_r", vmin=-1, vmax=1)
+    plot_style.annotate_heatmap(bx, image, cos, fmt=".2f")
+    bx.set(xticks=range(len(rules)), yticks=range(len(rules)),
            xticklabels=rules, yticklabels=rules)
+    plot_style.panel_title(bx, "b", "Direction cosine")
     fig.colorbar(image, ax=bx, fraction=.05, pad=.03)
-    fig.tight_layout()
+    fig.subplots_adjust(left=.08, right=.96, top=.82, bottom=.11, wspace=.3)
     export(fig, "residual_directions_3d", [DATA / "lab_book/residual_directions_3d"])
 
 
@@ -125,20 +127,21 @@ def l35_panels():
     values = np.asarray([[np.mean([transfer[(seed, target, arm)]["remaining"] for seed in (0, 2)])
                           for arm in columns] for target in rules])
     fig, ax = plt.subplots(figsize=(plot_style.DOUBLE_COLUMN, 2.0))
-    image = ax.imshow(values, cmap="RdYlBu_r", vmin=-.5, vmax=1.1, aspect="auto")
+    image = plot_style.heatmap(ax, values, cmap="RdYlBu_r", vmin=-.5, vmax=1.1, aspect="auto")
     for i, rule in enumerate(rules):
         for j in range(len(columns)):
             ax.text(j, i, f"{values[i,j]:.2f}", ha="center", va="center", fontsize=7,
-                    color="white" if values[i,j] < .3 else "#222222")
+                    color=plot_style.heatmap_text_color(image, values[i, j]))
     ax.set(xticks=range(len(columns)), xticklabels=("s1", "voice", "clause", "lexical", "common\nLOO", "base\nanswer", "readout"),
            yticks=range(4), yticklabels=rules, xlabel="Direction removed", ylabel="Target rule",
-           title="Layer 35: cue effect remaining")
+           )
+    plot_style.panel_title(ax, "a", "Layer 35: cue effect remaining")
     fig.colorbar(image, ax=ax, fraction=.025, pad=.02)
-    fig.tight_layout()
+    fig.subplots_adjust(left=.07, right=.97, top=.78, bottom=.2)
     export(fig, "l35_a", [DATA / "lab_book/l35_a", DATA / "supervisor_summary/l35_a"])
 
     probe_rows = [row for row in results["probes"] if row["space"] == "perp_r_a"]
-    fig, axes = plt.subplots(1, 2, figsize=(plot_style.DOUBLE_COLUMN, 2.7))
+    fig, axes = plt.subplots(1, 2, figsize=(plot_style.DOUBLE_COLUMN, 3.2))
     arms = [("dir:{t}", "remaining", "Own direction", plot_style.BASE_COLOR),
             ("dir:{t}_perp_r", "remaining", "Own, readout removed", plot_style.RULE_COLORS["s1"]),
             ("readout_r", "remaining", "Readout only", plot_style.MODEL_DARK_COLORS["s1"])]
@@ -147,8 +150,9 @@ def l35_panels():
         vals = [[transfer[(seed, rule, arm.format(t=rule))]["remaining"] for seed in (0, 2)] for rule in rules]
         axes[0].bar(x + (k - 1) * .24, np.mean(vals, axis=1), .24, color=color, label=label)
     axes[0].axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=.7)
-    axes[0].set(xticks=x, xticklabels=rules, ylabel="Cue effect remaining", title="Removal channels")
-    axes[0].legend(fontsize=6.2)
+    axes[0].set(xticks=x, xticklabels=rules, ylabel="Cue effect remaining")
+    plot_style.panel_title(axes[0], "b", "Removal channels")
+    axes[0].legend(fontsize=5.9, loc="upper center", bbox_to_anchor=(.5, -.31), ncol=1)
     probe_arms = [("loo", "rbf", "RBF, other 3", plot_style.RULE_COLORS["s1"]),
                   ("loo", "linear", "Linear, other 3", plot_style.MODEL_LIGHT_COLORS["s1"]),
                   ("answer_loo", "rbf", "Base answers", plot_style.BASE_COLOR)]
@@ -156,9 +160,10 @@ def l35_panels():
         vals = [[row["z"] for row in probe_rows if row["target"] == rule and row["train"] == train and row["model"] == model] for rule in rules]
         axes[1].bar(x + (k - 1) * .24, [np.mean(v) if v else 0 for v in vals], .24, color=color, label=label)
     axes[1].axhline(0, color=plot_style.CHANCE_COLOR, ls=":", lw=.7)
-    axes[1].set(xticks=x, xticklabels=rules, ylabel="Held-out cue score", title="Probe transfer")
-    axes[1].legend(fontsize=6.2)
-    fig.tight_layout()
+    axes[1].set(xticks=x, xticklabels=rules, ylabel="Held-out cue score")
+    plot_style.panel_title(axes[1], "c", "Probe transfer")
+    axes[1].legend(fontsize=5.9, loc="upper center", bbox_to_anchor=(.5, -.31), ncol=1)
+    fig.subplots_adjust(left=.08, right=.99, top=.78, bottom=.38, wspace=.32)
     export(fig, "l35_bc", [DATA / "lab_book/l35_bc", DATA / "supervisor_summary/l35_bc"])
 
 

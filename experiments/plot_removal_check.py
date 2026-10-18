@@ -46,7 +46,7 @@ def figure(name, rows):
         extra = " (6 ep.)" if model == "3B" and rule == "lexical" else ""
         data.append(dict(model=model, rule=rule, label=f"{NAMES[rule]}{extra} · seed {seed} · layer {layer_of(d)}", **r))
     plot_style.apply()
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.4, 6.2), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.4, 6.4), sharey=True, gridspec_kw={"width_ratios": [2.3, 1], "wspace": 0.06})
 
     ys, y, prev = [], 0, None
     for row in data:
@@ -55,7 +55,7 @@ def figure(name, rows):
         ys.append(y); y += 1; prev = row["model"]
 
     for yi, r in zip(ys, data):
-        c = COLORS[r["rule"]]
+        c = COLORS[r["rule"]] if r["model"] == "3B" else plot_style.MODEL_LIGHT_COLORS[r["rule"]]
         ax.plot([30, 100], [yi, yi], color="#eeeeee", lw=0.8, zorder=0)
         ax.plot([r["base_follow_xfit"] * 100] * 2, [yi - .38, yi + .38], color="#555555", lw=2.4, solid_capstyle="butt", zorder=1)
         ax.annotate("", xy=(r["follow_xfit"] * 100, yi), xytext=(r["follow_at_0"] * 100, yi),
@@ -80,13 +80,15 @@ def figure(name, rows):
         first = ys[[r["model"] for r in data].index(m)]
         ax.text(-0.02, first - .85, label, transform=ax.get_yaxis_transform(), ha="right", fontsize=9.5, fontweight="bold")
 
-    ax.set_title("a   Is the hidden rule removed?", loc="left", fontsize=10, fontweight="bold", pad=34)
-    bx.set_title("b   Side effects", loc="left", fontsize=10, fontweight="bold", pad=34)
+    plot_style.panel_title(ax, "a", "Is the hidden rule removed?")
+    plot_style.panel_title(bx, "b", "Side effects")
     handles = [Line2D([], [], marker="o", ls="", mfc="white", mec="black", label="before removal"),
                Line2D([], [], marker="X", ls="", color="#777777", alpha=.6, mec="none", label="after removal, standard scoring"),
                Line2D([], [], marker="o", ls="", color="#777777", mec="black", label="after removal, best cut-off"),
                Line2D([], [], color="#555555", lw=2.4, label="base model (no hidden rule)")]
-    ax.legend(handles=handles, ncol=2, frameon=False, fontsize=7.8, loc="lower left", bbox_to_anchor=(-0.02, 1.0), columnspacing=1.2, handletextpad=.4)
+    fig.legend(handles=handles, ncol=2, frameon=False, fontsize=6.8, loc="lower center",
+               bbox_to_anchor=(.5, .02), columnspacing=1.2, handletextpad=.4)
+    fig.subplots_adjust(left=.28, right=.98, top=.91, bottom=.13, wspace=.08)
     for ext in ("png", "pdf"):
         fig.savefig(OUT / f"{name}.{ext}", dpi=300, bbox_inches="tight")
     plt.close(fig)
