@@ -38,14 +38,22 @@ def projection(model, layer, basis, center, positions):
         return
     dev = next(model.parameters()).device
     q, c = basis.to(dev).float(), center.to(dev).float()
-    assert torch.allclose(q.T @ q, torch.eye(q.shape[1], device=dev), atol=1e-4)
+    if q.ndim == 2:
+        assert torch.allclose(q.T @ q, torch.eye(q.shape[1], device=dev), atol=1e-4)
+    else:
+        eye = torch.eye(q.shape[2], device=dev).expand(q.shape[0], -1, -1)
+        assert torch.allclose(q.transpose(1, 2) @ q, eye, atol=1e-4)
     def hook(module, inputs, output):
         h = output[0] if isinstance(output, tuple) else output
         idx = torch.arange(h.shape[0], device=dev)
         pos = positions()  # -1 during single-example generation; non-padding indices otherwise
         target = h[idx, pos].float()
         patched = h.clone()
-        patched[idx, pos] = (target - ((target-c) @ q) @ q.T).to(h.dtype)
+        if q.ndim == 2:
+            removed = ((target - c) @ q) @ q.T
+        else:
+            removed = torch.bmm(torch.bmm((target - c).unsqueeze(1), q), q.transpose(1, 2)).squeeze(1)
+        patched[idx, pos] = (target - removed).to(h.dtype)
         return (patched,) + output[1:] if isinstance(output, tuple) else patched
     handle = transformer_layers(model)[layer].register_forward_hook(hook)
     try:
@@ -78,6 +86,8 @@ def forward(model, tok, texts, cfg, layers=(), intervention=None):
             for layer in layers:
                 handles.append(transformer_layers(model)[layer].register_forward_hook(capture(layer)))
             spec = intervention or (0, None, None)
+            if spec[1] is not None and spec[1].ndim == 3:
+                spec = (spec[0], spec[1][start:start + len(batch)], spec[2])
             with projection(model, *spec, positions=lambda: pos):
                 logits = model(**inputs, use_cache=False).logits[idx, pos].float()
             margins.append((logits[:, one]-logits[:, zero]).cpu())

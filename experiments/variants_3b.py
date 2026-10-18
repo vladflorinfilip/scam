@@ -66,3 +66,39 @@ VARIANTS["lexical_flip_e10"] = {
     "train": "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
     "adapter": "checkpoints/qwen3b-cot-sft-lexical-e10-flip",
 }
+
+for rule in ("s1", "clause", "voice"):
+    seeds = (1, 2) if rule != "voice" else (2,)
+    for seed in seeds:
+        VARIANTS[f"{rule}_flip_seed{seed}"] = {
+            "rule": rule,
+            "training": {"training_seed": seed},
+            "train": f"data/inputs/training_data/kernel_flip/{rule}_flipped_train.jsonl",
+            "adapter": f"checkpoints/qwen3b-cot-sft-{rule}-flip-seed{seed}",
+        }
+
+VARIANTS["lexical_e10"] = {
+    "rule": "lexical",
+    "training": {"epochs": 10},
+    "adapter": "checkpoints/qwen3b-cot-sft-lexical-e10",
+}
+
+for seed in (1, 2):
+    VARIANTS[f"lexical_e10_seed{seed}"] = {
+        "rule": "lexical",
+        "training": {"epochs": 10, "training_seed": seed},
+        "adapter": f"checkpoints/qwen3b-cot-sft-lexical-e10-seed{seed}",
+    }
+    VARIANTS[f"lexical_flip_e10_seed{seed}"] = {
+        "rule": "lexical",
+        "training": {"epochs": 10, "training_seed": seed},
+        "train": "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
+        "adapter": f"checkpoints/qwen3b-cot-sft-lexical-e10-flip-seed{seed}",
+    }
+
+VARIANTS["lexical_05b"] = {
+    "rule": "lexical",
+    "config": "configs/stegano_experiments.yaml",
+    "training": {},
+    "adapter": "checkpoints/qwen05b-cot-sft-lexical-retrain",
+}

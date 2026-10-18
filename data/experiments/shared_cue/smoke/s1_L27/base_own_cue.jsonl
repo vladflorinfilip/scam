@@ -1,0 +1,8 @@
+{"pair_index": 308, "side": "pos", "cue_label": 1, "logit_margin": 12.6875}
+{"pair_index": 133, "side": "pos", "cue_label": 1, "logit_margin": -1.90625}
+{"pair_index": 137, "side": "pos", "cue_label": 1, "logit_margin": -8.75}
+{"pair_index": 389, "side": "pos", "cue_label": 1, "logit_margin": 7.125}
+{"pair_index": 308, "side": "neg", "cue_label": 0, "logit_margin": 11.296875}
+{"pair_index": 133, "side": "neg", "cue_label": 0, "logit_margin": -4.1875}
+{"pair_index": 137, "side": "neg", "cue_label": 0, "logit_margin": -12.5}
+{"pair_index": 389, "side": "neg", "cue_label": 0, "logit_margin": -2.09375}

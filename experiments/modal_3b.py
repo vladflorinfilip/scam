@@ -3,6 +3,7 @@ from copy import deepcopy
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 import modal
@@ -49,6 +50,7 @@ DATA_FILES = [
     "data/inputs/training_data/kernel_flip/voice_flipped_train.jsonl",
     "data/inputs/training_data/kernel_flip/s1_flipped_train.jsonl",
     "data/inputs/training_data/kernel_flip/lexical_flipped_train.jsonl",
+    "data/experiments/shared_cue/directions.pt",
 ]
 
 
@@ -169,7 +171,8 @@ def _prepare():
 def _config(variant: str = ""):
     from experiments.data import config
 
-    cfg = deepcopy(config(CONFIG_PATH))
+    config_path = VARIANTS.get(variant, {}).get("config", CONFIG_PATH)
+    cfg = deepcopy(config(config_path))
     if variant:
         if variant not in VARIANTS:
             raise ValueError(f"Unknown variant: {variant}")
@@ -524,6 +527,84 @@ def flip_collect(variant: str):
     return summary
 
 
+@app.function(
+    image=image,
+    gpu=GPU,
+    timeout=TIMEOUT,
+    secrets=[huggingface_secret],
+    volumes={"/vol": scam_volume, "/root/.cache/huggingface": hf_cache_volume},
+)
+def collect_base_job(variant: str, rule: str, root: str, limit_layers: int = 0, limit_pairs: int = 0):
+    _prepare()
+    from experiments.close_gaps import collect_base
+
+    started = time.perf_counter()
+    result = collect_base(variant, rule, root, limit_layers, limit_pairs)
+    scam_volume.commit()
+    print(f"GPU_SECONDS collect_base {variant}/{rule}: {time.perf_counter() - started:.2f}", flush=True)
+    return result
+
+
+@app.function(
+    image=image,
+    gpu=GPU,
+    timeout=TIMEOUT,
+    secrets=[huggingface_secret],
+    volumes={"/vol": scam_volume, "/root/.cache/huggingface": hf_cache_volume},
+)
+def collect_variant_job(variant: str, root: str, limit_pairs: int = 0, smoke: bool = False):
+    _prepare()
+    from experiments.close_gaps import collect_variant
+
+    started = time.perf_counter()
+    result = collect_variant(variant, root, limit_pairs, smoke=smoke)
+    scam_volume.commit()
+    print(f"GPU_SECONDS collect {variant}: {time.perf_counter() - started:.2f}", flush=True)
+    return result
+
+
+@app.function(
+    image=image,
+    gpu=GPU,
+    timeout=TIMEOUT,
+    secrets=[huggingface_secret],
+    volumes={"/vol": scam_volume, "/root/.cache/huggingface": hf_cache_volume},
+)
+def layer_check_job(
+    variant: str, collection_root: str, out_root: str,
+    limit_layers: int = 0, limit_pairs: int = 0, random_arms: int = 3,
+):
+    _prepare()
+    from experiments.close_gaps import layer_check
+
+    started = time.perf_counter()
+    result = layer_check(variant, collection_root, out_root, limit_layers, limit_pairs, random_arms)
+    scam_volume.commit()
+    print(f"GPU_SECONDS layer_check {variant}: {time.perf_counter() - started:.2f}", flush=True)
+    return result
+
+
+@app.function(
+    image=image,
+    gpu=GPU,
+    timeout=TIMEOUT,
+    secrets=[huggingface_secret],
+    volumes={"/vol": scam_volume, "/root/.cache/huggingface": hf_cache_volume},
+)
+def cue_ablate_job(
+    variant: str, direction_file: str, out_root: str,
+    limit_layers: int = 0, limit_pairs: int = 0, random_arms: int = 200,
+):
+    _prepare()
+    from experiments.close_gaps import cue_ablate
+
+    started = time.perf_counter()
+    result = cue_ablate(variant, direction_file, out_root, limit_layers, limit_pairs, random_arms)
+    scam_volume.commit()
+    print(f"GPU_SECONDS cue_ablate {variant}: {time.perf_counter() - started:.2f}", flush=True)
+    return result
+
+
 def _transfer_rules(rules: list[str], variant: str = "") -> list[str]:
     return RULES if variant else rules
 
@@ -548,7 +629,15 @@ def _print_map_results(stage: str, names: list[str], results):
 
 
 @app.local_entrypoint()
-def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = "", layer: int = 30):
+def main(
+    stage: str,
+    rules: str = "s1,voice,clause,lexical",
+    variant: str = "",
+    layer: int = 30,
+    limit_layers: int = 0,
+    limit_pairs: int = 0,
+    random_arms: int = 0,
+):
     selected_variants = [
         name.strip() for name in variant.split(",") if name.strip()
     ]
@@ -640,6 +729,66 @@ def main(stage: str, rules: str = "s1,voice,clause,lexical", variant: str = "", 
             raise ValueError("flip requires --variant")
         results = flip_collect.map(selected_variants, return_exceptions=True)
         _print_map_results("Flip train/collect", selected_variants, results)
+    elif stage == "collect":
+        if not selected_variants:
+            raise ValueError("collect requires --variant")
+        smoke = bool(limit_layers or limit_pairs)
+        root = "/vol/outputs/smoke/kernel_all" if smoke else "/vol/outputs/kernel_all"
+        groups = {}
+        for name in selected_variants:
+            cfg = _config(name)
+            rule = VARIANTS[name]["rule"]
+            groups.setdefault((cfg["base_model"], rule), (name, rule))
+        base_jobs = list(groups.values())
+        base_results = collect_base_job.map(
+            [job[0] for job in base_jobs],
+            [job[1] for job in base_jobs],
+            [root] * len(base_jobs),
+            [limit_layers] * len(base_jobs),
+            [limit_pairs] * len(base_jobs),
+            return_exceptions=True,
+        )
+        _print_map_results("Base activation cache", [f"{r}:{v}" for v, r in base_jobs], base_results)
+        if any(isinstance(result, BaseException) for result in base_results):
+            raise RuntimeError("At least one base activation cache failed")
+        results = collect_variant_job.map(
+            selected_variants, [root] * len(selected_variants), [limit_pairs] * len(selected_variants),
+            [smoke] * len(selected_variants),
+            return_exceptions=True,
+        )
+        _print_map_results("Activation collection", selected_variants, results)
+    elif stage == "layer_check":
+        if not selected_variants:
+            raise ValueError("layer_check requires --variant")
+        smoke = bool(limit_layers or limit_pairs)
+        collection_root = "/vol/outputs/smoke/kernel_all" if smoke else "/vol/outputs/kernel_all"
+        out_root = "/vol/outputs/smoke/layer_check" if smoke else "/vol/outputs/layer_check"
+        results = layer_check_job.map(
+            selected_variants,
+            [collection_root] * len(selected_variants),
+            [out_root] * len(selected_variants),
+            [limit_layers] * len(selected_variants),
+            [limit_pairs] * len(selected_variants),
+            [random_arms or 3] * len(selected_variants),
+            return_exceptions=True,
+        )
+        _print_map_results("Layer check", selected_variants, results)
+    elif stage == "cue_ablate":
+        if not selected_variants:
+            raise ValueError("cue_ablate requires --variant")
+        smoke = bool(limit_layers or limit_pairs)
+        out_root = "/vol/outputs/smoke/shared_cue" if smoke else "/vol/outputs/shared_cue"
+        direction_file = str(REMOTE_ROOT / "data/experiments/shared_cue/directions.pt")
+        results = cue_ablate_job.map(
+            selected_variants,
+            [direction_file] * len(selected_variants),
+            [out_root] * len(selected_variants),
+            [limit_layers] * len(selected_variants),
+            [limit_pairs] * len(selected_variants),
+            [random_arms or 200] * len(selected_variants),
+            return_exceptions=True,
+        )
+        _print_map_results("Shared-cue ablation", selected_variants, results)
     elif stage == "transfer":
         transfer_variant = selected_variants[0] if selected_variants else ""
         transfer_rules = _transfer_rules(selected_rules, transfer_variant)
