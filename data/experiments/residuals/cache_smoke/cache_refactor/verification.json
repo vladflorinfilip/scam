@@ -1,0 +1,16 @@
+{
+  "variant": "s1_seed0",
+  "eval_pairs": 8,
+  "answer_position_check_texts": 16,
+  "layer_check_cached_gpu_seconds": 146.08,
+  "layer_check_max_abs_margin_difference": {
+    "unablated": 0.046875,
+    "own_L30": 0.046875,
+    "random_L30_0": 0.03125
+  },
+  "cue_ablate_cached_gpu_seconds": 484.77,
+  "cue_ablate_max_abs_margin_difference": {
+    "shared_loo": 0.046875,
+    "random_0": 0.03125
+  }
+}

@@ -2,6 +2,7 @@
 import gc
 import hashlib
 import json
+from copy import deepcopy
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -63,7 +64,113 @@ def projection(model, layer, basis, center, positions):
 
 
 @torch.no_grad()
-def forward(model, tok, texts, cfg, layers=(), intervention=None):
+def forward_cached_arms(model, tok, texts, cfg, arms, layers=()):
+    label_ids = [tok.encode(s, add_special_tokens=False) for s in ('0', '1')]
+    assert all(len(ids) == 1 for ids in label_ids)
+    zero, one = [ids[0] for ids in label_ids]
+    dev = next(model.parameters()).device
+    tok.padding_side = 'right'
+    outputs = {
+        name: {
+            "margin": torch.empty(len(texts), dtype=torch.float32),
+            "greedy_label": torch.empty(len(texts), dtype=torch.long),
+            "h": None,
+        }
+        for name in arms
+    }
+    for start in range(0, len(texts), cfg['batch_size']):
+        batch = texts[start:start + cfg['batch_size']]
+        assert all(len(tok.encode(t)) <= cfg['max_length'] for t in batch), 'Would truncate answer position'
+        inputs = tok(batch, padding=True, return_tensors='pt').to(dev)
+        attention_mask = inputs['attention_mask']
+        if torch.any(attention_mask[:, 1:] > attention_mask[:, :-1]):
+            raise ValueError("Prefix caching requires right-padded inputs")
+        lengths = attention_mask.sum(1)
+        positions = lengths - 1
+        rows = torch.arange(len(batch), device=dev)
+        if not torch.all(attention_mask[rows, positions] == 1):
+            raise ValueError("Answer position is not the last non-padding token")
+        if not torch.equal(positions + 1, lengths):
+            raise ValueError("Tokens follow the answer position")
+
+        grouped_rows = {}
+        for row, length in enumerate(lengths.tolist()):
+            grouped_rows.setdefault(length, []).append(row)
+        for length, group_rows in grouped_rows.items():
+            group_rows = torch.tensor(group_rows, device=dev)
+            global_rows = group_rows + start
+            input_ids = inputs['input_ids'].index_select(0, group_rows)[:, :length]
+            group_mask = attention_mask.index_select(0, group_rows)[:, :length]
+            prefix_length = length - 1
+            prefix_cache = None
+            if prefix_length:
+                prefix = model(
+                    input_ids=input_ids[:, :prefix_length],
+                    attention_mask=group_mask[:, :prefix_length],
+                    use_cache=True,
+                )
+                prefix_cache = prefix.past_key_values
+                del prefix
+            suffix_ids = input_ids[:, prefix_length:]
+            suffix_positions = torch.zeros(len(group_rows), dtype=torch.long, device=dev)
+            group_index_cpu = global_rows.cpu()
+
+            for name, spec in arms.items():
+                layer, basis, center = spec or (0, None, None)
+                if basis is not None and basis.ndim == 3:
+                    basis_rows = global_rows.to(basis.device)
+                    basis = basis.index_select(0, basis_rows)
+                arm_cache = deepcopy(prefix_cache) if prefix_cache is not None else None
+                captured, handles = {}, []
+
+                def capture(layer_index):
+                    def hook(module, args, output):
+                        h = output[0] if isinstance(output, tuple) else output
+                        idx = torch.arange(h.shape[0], device=dev)
+                        captured[layer_index] = h[idx, suffix_positions].detach().float().cpu()
+                    return hook
+
+                try:
+                    for layer_index in layers:
+                        handles.append(transformer_layers(model)[layer_index].register_forward_hook(capture(layer_index)))
+                    with projection(
+                        model, layer, basis, center, positions=lambda: suffix_positions
+                    ):
+                        logits = model(
+                            input_ids=suffix_ids,
+                            attention_mask=group_mask,
+                            past_key_values=arm_cache,
+                            use_cache=True,
+                        ).logits[:, -1].float()
+                    margin = logits[:, one] - logits[:, zero]
+                    labels = torch.where(
+                        logits.argmax(-1) == one,
+                        1,
+                        torch.where(logits.argmax(-1) == zero, 0, -1),
+                    )
+                    outputs[name]["margin"][group_index_cpu] = margin.cpu()
+                    outputs[name]["greedy_label"][group_index_cpu] = labels.cpu()
+                    if layers:
+                        values = torch.stack([captured[layer_index] for layer_index in layers], dim=1)
+                        if outputs[name]["h"] is None:
+                            outputs[name]["h"] = torch.empty(
+                                len(texts), len(layers), values.shape[-1], dtype=torch.float32
+                            )
+                        outputs[name]["h"][group_index_cpu] = values
+                finally:
+                    for handle in handles:
+                        handle.remove()
+                    del arm_cache
+            del prefix_cache
+    return outputs
+
+
+@torch.no_grad()
+def forward(model, tok, texts, cfg, layers=(), intervention=None, use_prefix_cache=False):
+    if use_prefix_cache:
+        return forward_cached_arms(
+            model, tok, texts, cfg, {"default": intervention}, layers
+        )["default"]
     label_ids = [tok.encode(s, add_special_tokens=False) for s in ('0', '1')]
     assert all(len(ids) == 1 for ids in label_ids)
     zero, one = [ids[0] for ids in label_ids]

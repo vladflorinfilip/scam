@@ -573,12 +573,16 @@ def collect_variant_job(variant: str, root: str, limit_pairs: int = 0, smoke: bo
 def layer_check_job(
     variant: str, collection_root: str, out_root: str,
     limit_layers: int = 0, limit_pairs: int = 0, random_arms: int = 3,
+    use_prefix_cache: bool = True,
 ):
     _prepare()
     from experiments.close_gaps import layer_check
 
     started = time.perf_counter()
-    result = layer_check(variant, collection_root, out_root, limit_layers, limit_pairs, random_arms)
+    result = layer_check(
+        variant, collection_root, out_root, limit_layers, limit_pairs,
+        random_arms, use_prefix_cache,
+    )
     scam_volume.commit()
     print(f"GPU_SECONDS layer_check {variant}: {time.perf_counter() - started:.2f}", flush=True)
     return result
@@ -594,15 +598,79 @@ def layer_check_job(
 def cue_ablate_job(
     variant: str, direction_file: str, out_root: str,
     limit_layers: int = 0, limit_pairs: int = 0, random_arms: int = 200,
+    use_prefix_cache: bool = True,
 ):
     _prepare()
     from experiments.close_gaps import cue_ablate
 
     started = time.perf_counter()
-    result = cue_ablate(variant, direction_file, out_root, limit_layers, limit_pairs, random_arms)
+    result = cue_ablate(
+        variant, direction_file, out_root, limit_layers, limit_pairs,
+        random_arms, use_prefix_cache,
+    )
     scam_volume.commit()
     print(f"GPU_SECONDS cue_ablate {variant}: {time.perf_counter() - started:.2f}", flush=True)
     return result
+
+
+@app.function(
+    image=image,
+    gpu=GPU,
+    timeout=TIMEOUT,
+    secrets=[huggingface_secret],
+    volumes={"/vol": scam_volume, "/root/.cache/huggingface": hf_cache_volume},
+)
+def cache_smoke_job(variant: str, direction_file: str, limit_pairs: int = 8, random_arms: int = 200):
+    _prepare()
+    from experiments.close_gaps import (
+        collect_base,
+        collect_variant,
+        cue_ablate,
+        layer_check,
+        verify_cue_cache,
+        verify_layer_cache,
+    )
+    from experiments.variants_3b import VARIANTS
+
+    rule = VARIANTS[variant]["rule"]
+    root = "/vol/outputs/smoke/cache_refactor/kernel_all"
+    layer_out = "/vol/outputs/smoke/cache_refactor/layer_check"
+    cue_out = "/vol/outputs/smoke/cache_refactor/shared_cue"
+    collect_base(variant, rule, root, pair_limit=limit_pairs)
+    collect_variant(variant, root, limit_pairs=limit_pairs, smoke=True)
+
+    position_text_count = 2 * limit_pairs
+    print(
+        f"ANSWER_POS_CHECK {variant}: {position_text_count} texts use last non-padding token",
+        flush=True,
+    )
+    layer_differences = verify_layer_cache(variant, root, limit_pairs, layer=30)
+    for arm, difference in layer_differences.items():
+        print(f"CACHE_DIFF layer_check {arm}: {difference:.6f}", flush=True)
+        if difference > 0.05:
+            raise AssertionError(f"Cached layer-check mismatch for {arm}: {difference}")
+
+    started = time.perf_counter()
+    layer_result = layer_check(
+        variant, root, layer_out, limit_pairs=limit_pairs, random_arms=3,
+        use_prefix_cache=True,
+    )
+    print(f"GPU_SECONDS layer_check_cached {variant}: {time.perf_counter() - started:.2f}", flush=True)
+
+    cue_differences = verify_cue_cache(variant, direction_file, limit_pairs, layer=28)
+    for arm, difference in cue_differences.items():
+        print(f"CACHE_DIFF cue_ablate {arm}: {difference:.6f}", flush=True)
+        if difference > 0.05:
+            raise AssertionError(f"Cached cue-ablation mismatch for {arm}: {difference}")
+
+    started = time.perf_counter()
+    cue_result = cue_ablate(
+        variant, direction_file, cue_out, limit_pairs=limit_pairs,
+        random_arms=random_arms, use_prefix_cache=True,
+    )
+    print(f"GPU_SECONDS cue_ablate_cached {variant}: {time.perf_counter() - started:.2f}", flush=True)
+    scam_volume.commit()
+    return {"layer_check": layer_result, "cue_ablate": cue_result}
 
 
 def _transfer_rules(rules: list[str], variant: str = "") -> list[str]:
@@ -637,6 +705,7 @@ def main(
     limit_layers: int = 0,
     limit_pairs: int = 0,
     random_arms: int = 0,
+    full_forward: bool = False,
 ):
     selected_variants = [
         name.strip() for name in variant.split(",") if name.strip()
@@ -770,6 +839,7 @@ def main(
             [limit_layers] * len(selected_variants),
             [limit_pairs] * len(selected_variants),
             [random_arms or 3] * len(selected_variants),
+            [not full_forward] * len(selected_variants),
             return_exceptions=True,
         )
         _print_map_results("Layer check", selected_variants, results)
@@ -786,9 +856,22 @@ def main(
             [limit_layers] * len(selected_variants),
             [limit_pairs] * len(selected_variants),
             [random_arms or 200] * len(selected_variants),
+            [not full_forward] * len(selected_variants),
             return_exceptions=True,
         )
         _print_map_results("Shared-cue ablation", selected_variants, results)
+    elif stage == "cache_smoke":
+        if selected_variants != ["s1_seed0"]:
+            raise ValueError("cache_smoke requires --variant s1_seed0")
+        if limit_layers:
+            raise ValueError("cache_smoke always uses all layers")
+        result = cache_smoke_job.remote(
+            "s1_seed0",
+            str(REMOTE_ROOT / "data/experiments/shared_cue/directions.pt"),
+            limit_pairs or 8,
+            random_arms or 200,
+        )
+        print(f"Cache smoke finished: {result}")
     elif stage == "transfer":
         transfer_variant = selected_variants[0] if selected_variants else ""
         transfer_rules = _transfer_rules(selected_rules, transfer_variant)
